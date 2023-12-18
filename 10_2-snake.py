@@ -71,7 +71,7 @@ def init_game() -> None:
     direction = Direction.UP
     create_new_food = True
     fruit = Fruit(apple_image)
-    snake:list[Segment] = [s1,s2,s3,s4]
+    snake = [s1,s2,s3,s4]
     score = 0
 
 
