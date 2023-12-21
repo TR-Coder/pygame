@@ -3,6 +3,8 @@
 import pygame as pg
 from math import ceil
 import random
+import ctypes
+import sys
 
 pg.init()
 
@@ -21,12 +23,31 @@ TIME_BETWEEN_SHOTS = 500 # ms
 INVIDER_ROWS = 5
 INVIDER_COLUMNS = 4
 
+# ===================================================
+def screen_scale_factor() -> float:
+    ctypes.windll.user32.SetProcessDPIAware()    # On some systems, high DPI settings can cause Pygame windows to appear larger than expected.
+    if sys.platform.startswith('win32'):
+        return ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+    return 1
+# ===================================================
+def screen_resolution() -> tuple[int,int]:
+    info_object = pg.display.Info()
+    scale = screen_scale_factor()
+    width = int(info_object.current_w * scale * 0.5)
+    height = int(info_object.current_h * scale * 0.5)
+    return width, height
+
+# ===================================================
+
+SCREEN_WIDTH, SCREEN_HEIGHT = screen_resolution()
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pg.display.set_caption('Space war')
 font = pg.font.SysFont('Bauhaus 93', 60)
 clock = pg.time.Clock()
 image = pg.image.load("data/space_war/bg.png")
 backspace_key_pressed = False
+
+
 
 # Sprite groups
 spacecraft_group = pg.sprite.Group()            # type: ignore
