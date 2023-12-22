@@ -5,14 +5,22 @@ from math import ceil
 import random
 import ctypes
 import sys
+from enum import Enum
 
 pg.init()
 
 pg.mixer.pre_init()
 pg.mixer.init()
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 800
+# SCREEN_WIDTH = 1600
+# SCREEN_HEIGHT = 1200
+
+class GameStatus(Enum):
+    START=0
+    PLAYING=1
+    PLAYER_WINS=2
+    PLAYER_LOSES=3
+
 FPS = 60
 WHITE_COLOR = (255, 255, 255)
 RED_COLOR = (255, 0, 0)
@@ -23,18 +31,31 @@ TIME_BETWEEN_SHOTS = 500 # ms
 INVIDER_ROWS = 5
 INVIDER_COLUMNS = 4
 
+
 # ===================================================
 def screen_scale_factor() -> float:
-    ctypes.windll.user32.SetProcessDPIAware()    # On some systems, high DPI settings can cause Pygame windows to appear larger than expected.
     if sys.platform.startswith('win32'):
+        ctypes.windll.user32.SetProcessDPIAware()    # On some systems, high DPI settings can cause Pygame windows to appear larger than expected.
         return ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
     return 1
+
+# ===================================================
+# Perquè el joc es mostre amb unes dimensions agradables per pantalla apliquem un ajust que
+# depen de la resoluió de la pantalla. Este ajust s'ha obtingut fent proves a diferents resolucions.
+def screen_size_adjument(display_info) -> tuple[float, float]:
+    if display_info.current_w >= 1600:
+        return 0.9, 0.8
+    return 1, 1
+
 # ===================================================
 def screen_resolution() -> tuple[int,int]:
+    # La resolució que retorna display.Info() està dividida pel factor d'escala de la pantalla, 
+    # per esta raó hem d'obtindre este factor d'escala i multiplicar-lo per la resolució.
     info_object = pg.display.Info()
     scale = screen_scale_factor()
-    width = int(info_object.current_w * scale * 0.5)
-    height = int(info_object.current_h * scale * 0.5)
+    adjustment_x, adjustment_y = screen_size_adjument(info_object)
+    width = int(info_object.current_w * scale * adjustment_x)
+    height = int(info_object.current_h * scale * adjustment_y)
     return width, height
 
 # ===================================================
@@ -46,8 +67,7 @@ font = pg.font.SysFont('Bauhaus 93', 60)
 clock = pg.time.Clock()
 image = pg.image.load("data/space_war/bg.png")
 backspace_key_pressed = False
-
-
+game_status = GameStatus.START
 
 # Sprite groups
 spacecraft_group = pg.sprite.Group()            # type: ignore
@@ -68,12 +88,15 @@ sound_laser.set_volume(0.25)
 
 # ===========================================================================================
 def complete_stage(image: pg.Surface) -> pg.Surface:
-    w = image.get_width()
-    h = image.get_height()
-    times = ceil(SCREEN_WIDTH / w)   
-    combined_image = pg.Surface((w*times, h)).convert_alpha()
-    for t in range(times):
-        combined_image.blit(image, (w*t, 0))
+    width = image.get_width()
+    height = image.get_height()
+    times_x = ceil(SCREEN_WIDTH / width)
+    times_y = ceil(SCREEN_HEIGHT / height)
+    combined_image = pg.Surface((width*times_x, height*times_y)).convert_alpha()
+    
+    for y in range(times_y):
+        for x in range(times_x):
+            combined_image.blit(image, (width*x, height*y))
     return combined_image
 
 # ===========================================================================================
@@ -82,8 +105,7 @@ def draw_background():
 
 # ===========================================================================================
 def draw_text(text:str, x:int, y:int):
-    img = font.render(text, True, WHITE_COLOR)
-    image = complete_stage(img)
+    image = font.render(text, True, WHITE_COLOR)
     screen.blit(image, (x,y))
 
 # ===========================================================================================
@@ -235,8 +257,6 @@ def create_inviders():
 bg_img = complete_stage(image)
 spacecraft = Spacecraft((SCREEN_WIDTH//2, SCREEN_HEIGHT-100), 15, spacecraft_group)
 timer_invader_shot = Timer(1000)
-
-# ===========================================================================================
 create_inviders()
 
 run = True
@@ -256,13 +276,16 @@ while run:
     shot_invider_group.update()
     explosion_group.update()
 
-
     spacecraft_group.draw(screen)
     shot_spacecraft_group.draw(screen)
     invider_group.draw(screen)
     shot_invider_group.draw(screen)
     explosion_group.draw(screen)
     draw_energy_bar(spacecraft.energy)
+
+    if game_status == GameStatus.START:
+        draw_text('GET READY, PRESS ANY KEY', 100,100)
+        game_status = GameStatus.PLAYING
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
