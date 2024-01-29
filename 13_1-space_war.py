@@ -31,7 +31,13 @@ TIME_BETWEEN_SHOTS = 500 # ms
 INVIDER_ROWS = 5
 INVIDER_COLUMNS = 4
 
-
+# ===========================================================================================
+def any_key_pressed() -> bool:
+    for event in pg.event.get():
+        if event.type == pg.KEYDOWN or event.type == pg.QUIT:
+            return True
+    return False
+            
 # ===================================================
 def screen_scale_factor() -> float:
     if sys.platform.startswith('win32'):
@@ -43,7 +49,10 @@ def screen_scale_factor() -> float:
 # Perquè el joc es mostre amb unes dimensions agradables per pantalla apliquem un ajust que
 # depen de la resoluió de la pantalla. Este ajust s'ha obtingut fent proves a diferents resolucions.
 def screen_size_adjument(display_info) -> tuple[float, float]:
-    if display_info.current_w >= 1600:
+    print(display_info.current_w)
+    if display_info.current_w >= 2000:
+        return 0.5, 0.5
+    if display_info.current_w >= 1500:
         return 0.9, 0.8
     return 1, 1
 
@@ -58,34 +67,6 @@ def screen_resolution() -> tuple[int,int]:
     height = int(info_object.current_h * scale * adjustment_y)
     return width, height
 
-# ===================================================
-
-SCREEN_WIDTH, SCREEN_HEIGHT = screen_resolution()
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pg.display.set_caption('Space war')
-font = pg.font.SysFont('Bauhaus 93', 60)
-clock = pg.time.Clock()
-image = pg.image.load("data/space_war/bg.png")
-backspace_key_pressed = False
-game_status = GameStatus.START
-
-# Sprite groups
-spacecraft_group = pg.sprite.Group()            # type: ignore
-shot_spacecraft_group = pg.sprite.Group()       # type: ignore
-invider_group = pg.sprite.Group()               # type: ignore
-shot_invider_group = pg.sprite.Group()          # type: ignore
-explosion_group = pg.sprite.Group()             # type: ignore
-
-# Sounds
-sound_explosion_1 = pg.mixer.Sound("data/space_war/explosion.wav")
-sound_explosion_1.set_volume(0.25)
-
-sound_explosion_2 = pg.mixer.Sound("data/space_war/explosion2.wav")
-sound_explosion_2.set_volume(0.25)
-
-sound_laser = pg.mixer.Sound("data/space_war/laser.wav")
-sound_laser.set_volume(0.25)
-
 # ===========================================================================================
 def complete_stage(image: pg.Surface) -> pg.Surface:
     width = image.get_width()
@@ -98,6 +79,84 @@ def complete_stage(image: pg.Surface) -> pg.Surface:
         for x in range(times_x):
             combined_image.blit(image, (width*x, height*y))
     return combined_image
+
+# ===========================================================================================
+class Spacecraft(pg.sprite.Sprite):
+    def __init__(self, xy_center: tuple[int,int], energy: int, *groups: pg.sprite.Group):
+        super().__init__(*groups)
+        self.image = pg.image.load('data/space_war/spaceship.png')
+        self.rect = self.image.get_rect()
+        self.rect.center = xy_center
+        self.energy = energy
+        self.timer = Timer(TIME_BETWEEN_SHOTS)
+        self.backspace_key_pressed: bool = False
+
+    def update(self):
+        global game_status
+        key = pg.key.get_pressed()
+        if key[pg.K_SPACE]:
+            self.backspace_key_pressed=True
+        if key[pg.K_LEFT] and self.rect.left > 0:
+            self.rect.x -= SPACECRAFT_SPEED
+        if key[pg.K_RIGHT] and self.rect.right < SCREEN_WIDTH:
+            self.rect.x += SPACECRAFT_SPEED
+        
+        time_out = self.timer.next_tick()
+        if self.backspace_key_pressed and time_out:
+            self.backspace_key_pressed=False
+            ShotSpacecraft((self.rect.centerx, self.rect.top), shot_spacecraft_group)
+            sound_laser.play()
+
+        self.mask = pg.mask.from_surface(self.image)
+
+        if self.energy == 0:
+            Explosion(self.rect.center, 1.5, explosion_group)
+            self.kill()
+            game_status = GameStatus.PLAYER_LOSES
+
+# ===========================================================================================
+class Timer():
+    def __init__(self, ms: int):
+        self.ticks = ms
+        self.initial_time = pg.time.get_ticks()
+
+    def next_tick(self) -> bool:
+        now = pg.time.get_ticks()
+        if (now - self.initial_time) > self.ticks:
+            self.initial_time = now
+            return True
+        return False
+    
+# ===========================================================================================
+# ===========================================================================================
+
+SCREEN_WIDTH, SCREEN_HEIGHT = screen_resolution()
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pg.display.set_caption('Space war')
+font = pg.font.SysFont('Bauhaus 93', 60)
+clock = pg.time.Clock()
+image = pg.image.load("data/space_war/bg.png")
+bg_img = complete_stage(image)
+
+game_status: GameStatus
+spacecraft_group: pg.sprite.Group
+shot_spacecraft_group: pg.sprite.Group
+invider_group: pg.sprite.Group
+shot_invider_group: pg.sprite.Group
+explosion_group: pg.sprite.Group
+spacecraft: Spacecraft
+timer_invader_shot = Timer(1000)
+
+# Sounds
+sound_explosion_1 = pg.mixer.Sound("data/space_war/explosion.wav")
+sound_explosion_1.set_volume(0.25)
+
+sound_explosion_2 = pg.mixer.Sound("data/space_war/explosion2.wav")
+sound_explosion_2.set_volume(0.25)
+
+sound_laser = pg.mixer.Sound("data/space_war/laser.wav")
+sound_laser.set_volume(0.25)
+
 
 # ===========================================================================================
 def draw_background():
@@ -120,51 +179,6 @@ def draw_energy_bar(energy: int):
     pg.draw.rect(screen, color, (10,SCREEN_HEIGHT - 10, energy * 10, 10), 10)
 
 # ===========================================================================================
-class Timer():
-    def __init__(self, ms: int):
-        self.ticks = ms
-        self.initial_time = pg.time.get_ticks()
-
-    def next_tick(self) -> bool:
-        now = pg.time.get_ticks()
-        if (now - self.initial_time) > self.ticks:
-            self.initial_time = now
-            return True
-        return False
-
-# ===========================================================================================
-class Spacecraft(pg.sprite.Sprite):
-    def __init__(self, xy_center: tuple[int,int], energy: int, *groups: pg.sprite.Group):
-        super().__init__(*groups)
-        self.image = pg.image.load('data/space_war/spaceship.png')
-        self.rect = self.image.get_rect()
-        self.rect.center = xy_center
-        self.energy = energy
-        self.timer = Timer(TIME_BETWEEN_SHOTS)
-        self.backspace_key_pressed: bool = False
-
-    def update(self):
-        key = pg.key.get_pressed()
-        if key[pg.K_SPACE]:
-            self.backspace_key_pressed=True
-        if key[pg.K_LEFT] and self.rect.left > 0:
-            self.rect.x -= SPACECRAFT_SPEED
-        if key[pg.K_RIGHT] and self.rect.right < SCREEN_WIDTH:
-            self.rect.x += SPACECRAFT_SPEED
-        
-        time_out = self.timer.next_tick()
-        if self.backspace_key_pressed and time_out:
-            self.backspace_key_pressed=False
-            ShotSpacecraft((self.rect.centerx, self.rect.top), shot_spacecraft_group)
-            sound_laser.play()
-
-        self.mask = pg.mask.from_surface(self.image)
-
-        if spacecraft.energy == 0:
-            Explosion(self.rect.center, 1.5, explosion_group)
-            self.kill()
-
-# ===========================================================================================
 class ShotSpacecraft(pg.sprite.Sprite):
     def __init__(self, xy_center: tuple[int,int], *groups: pg.sprite.Group):
         super().__init__(*groups)
@@ -174,6 +188,7 @@ class ShotSpacecraft(pg.sprite.Sprite):
 
     def update(self):
         global explosion_group
+        global game_status
         self.rect.y -= 5
         if self.rect.bottom < 0:
             self.kill()
@@ -182,7 +197,8 @@ class ShotSpacecraft(pg.sprite.Sprite):
             Explosion(self.rect.center, 1, explosion_group)
             sound_explosion_1.play()
             self.kill()
-
+            if len(invider_group) == 0:
+                game_status = GameStatus.PLAYER_WINS
         
 # ===========================================================================================
 class ShotInvader(pg.sprite.Sprite):
@@ -203,10 +219,12 @@ class ShotInvader(pg.sprite.Sprite):
                     
 # ===========================================================================================
 class Invider(pg.sprite.Sprite):
-    def __init__(self, xy_center: tuple[int,int], *groups: pg.sprite.Group):
+    def __init__(self, xy_center: tuple[int,int], scale: int, *groups: pg.sprite.Group):
         super().__init__(*groups)
         fate = str(random.randint(1,5))
-        self.image = pg.image.load(f'data/space_war/alien{fate}.png')
+        img = pg.image.load(f'data/space_war/alien{fate}.png')
+        x,y = img.get_size()
+        self.image = pg.transform.scale(img, (x*scale,y*scale))
         self.rect = self.image.get_rect()
         self.rect.center = xy_center
         self.x_increment = 2
@@ -227,7 +245,7 @@ class Explosion(pg.sprite.Sprite):
         for i in range(1,6):
             img = pg.image.load(f'data/space_war/exp{i}.png')
             x,y = img.get_size()
-            img = pg.transform.scale(img, (x*scale,y*scale))
+            img = pg.transform.scale(img, (x*scale, y*scale))
             self.images.append(img)
         self.index = 0
         self.image = self.images[self.index]
@@ -244,36 +262,69 @@ class Explosion(pg.sprite.Sprite):
                 self.image = self.images[self.index]
                 self.index += 1
 
-
-
 # ===========================================================================================
 def create_inviders():
+    _10_percent_height = SCREEN_HEIGHT * 0.10
+    _25_percent_width = SCREEN_WIDTH * 0.25
     for r in range(INVIDER_ROWS):
         for c in range(INVIDER_COLUMNS):
-            Invider((100+c*200, 100+r*70), invider_group)
+            Invider((_25_percent_width + c*200, _10_percent_height + r*70), 1.25, invider_group)
 
 # ===========================================================================================
+            
+def init_game():
+    global game_status
+    global spacecraft_group
+    global shot_spacecraft_group
+    global invider_group
+    global shot_invider_group
+    global explosion_group
+    global spacecraft
 
-bg_img = complete_stage(image)
-spacecraft = Spacecraft((SCREEN_WIDTH//2, SCREEN_HEIGHT-100), 15, spacecraft_group)
-timer_invader_shot = Timer(1000)
-create_inviders()
+    game_status = GameStatus.START
+    spacecraft_group = pg.sprite.Group()            # type: ignore
+    shot_spacecraft_group = pg.sprite.Group()       # type: ignore
+    invider_group = pg.sprite.Group()               # type: ignore
+    shot_invider_group = pg.sprite.Group()          # type: ignore
+    explosion_group = pg.sprite.Group()             # type: ignore
+
+    spacecraft = Spacecraft((SCREEN_WIDTH//2, SCREEN_HEIGHT-100), 15, spacecraft_group)
+
+    create_inviders()
+
+# ===========================================================================================
+            
+init_game()
 
 run = True
 while run:
     clock.tick(FPS)
     draw_background()
 
-    time_out = timer_invader_shot.next_tick()
-    if time_out: # and invider_group.sprites().len()>0
-        invider = random.choice(invider_group.sprites())
-        shot_invider = ShotInvader(invider.rect.center)
-        shot_invider_group.add(shot_invider)
+    if game_status == GameStatus.PLAYING:
+        time_out = timer_invader_shot.next_tick()
+        if time_out:
+            invider = random.choice(invider_group.sprites())
+            shot_invider = ShotInvader(invider.rect.center)
+            shot_invider_group.add(shot_invider)
 
-    spacecraft_group.update()
-    shot_spacecraft_group.update()
-    invider_group.update()
-    shot_invider_group.update()
+        spacecraft_group.update()
+        shot_spacecraft_group.update()
+        invider_group.update()
+        shot_invider_group.update()
+    else:
+        if game_status == GameStatus.START:
+            text = 'GET READY!!   Press any key'
+        elif game_status == GameStatus.PLAYER_WINS:
+            text = 'YOU WIN!!   Press any key'
+        elif game_status == GameStatus.PLAYER_LOSES:
+             text = 'YOU LOSE!!   Press any key'
+
+        draw_text(text, SCREEN_WIDTH//3, SCREEN_HEIGHT//2)
+        if any_key_pressed():
+            init_game()
+            game_status = GameStatus.PLAYING 
+
     explosion_group.update()
 
     spacecraft_group.draw(screen)
@@ -282,10 +333,6 @@ while run:
     shot_invider_group.draw(screen)
     explosion_group.draw(screen)
     draw_energy_bar(spacecraft.energy)
-
-    if game_status == GameStatus.START:
-        draw_text('GET READY, PRESS ANY KEY', 100,100)
-        game_status = GameStatus.PLAYING
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
