@@ -1,4 +1,3 @@
-from typing import Any
 import pygame as pg
 import os
 import random
@@ -19,6 +18,7 @@ clock = pg.time.Clock()
 working_directory = os.path.split(os.path.abspath(__file__))[0]
 assets_directory = os.path.join(working_directory, 'data')
 
+# -----------------------------------------------------------------------------------------------
 def load_image(name: str, scale:float=1) -> pg.Surface:
     img_path:str   = os.path.join(assets_directory, name)
     img:pg.Surface = pg.image.load(img_path).convert_alpha()    # convert_alpha() fa que funcione la transparència del .png
@@ -27,13 +27,26 @@ def load_image(name: str, scale:float=1) -> pg.Surface:
     return pg.transform.scale(img, scaled_size)
 
 # -----------------------------------------------------------------------------------------------
+def load_sound(name: str) -> pg.mixer.Sound:
+    sound_path:str = os.path.join(assets_directory, name)
+    return pg.mixer.Sound(sound_path)
+
+# -----------------------------------------------------------------------------------------------
 class Fly(pg.sprite.Sprite):
-    def __init__(self, rect_center: tuple[int,int], *groups: pg.sprite.Group):
+    def __init__(self, *groups: pg.sprite.Group):
         super().__init__(*groups)
-        self.image = load_image('mosquit.png', scale=0.15)   
+        self.image_alive = load_image('mosquit.png', scale=0.15)   
+        self.image_dead = load_image('mosquit_aplastat.png', scale=0.15)   
+        self.image = self.image_alive
         self.rect = self.image.get_rect()
-        self.rect.center = rect_center
+        self.rect.topleft = self.random_coordenates()
         self.hunted = False
+        self.counter = 0
+
+    def random_coordenates(self) -> tuple[int,int]:
+        x = random.randint(0, SCREEN_WIDTH-self.rect.width)
+        y = random.randint(0, SCREEN_HEIGHT-self.rect.height)
+        return x,y
     
     def update(self):
         if self.hunted:
@@ -46,27 +59,34 @@ class Fly(pg.sprite.Sprite):
         alealt_x = random.randint(-5,5)
         alealt_y = random.randint(-5,5)
         new_position = self.rect.move(alealt_x, alealt_y)
-        if area_screen.contains(new_position):
+        if area_screen.contains(new_position) and not self.hunted:
             self.rect = new_position
 
     def pass_away(self):
-        self.image = self.original
-        self.hunted = False
-        print()
+        if self.counter==0:
+            self.image = self.image_dead 
+        self.counter += 1
+        if self.counter == 0.5*FPS:
+            self.counter = 0
+            self.rect.topleft = self.random_coordenates()
+            self.image = self.image_alive
+            self.hunted = False      
 
-    def hitted(self):
+    def hitted(self) -> int:
+        '''Retorna els punts en què hem d'incrementar el score'''
         if not self.hunted:
             self.hunted = True
             self.original = self.image
+            return 1
+        return 0
     
 
 # -----------------------------------------------------------------------------------------------
 class FlySwatter(pg.sprite.Sprite):
-    def __init__(self, rect_center: tuple[int,int], *groups: pg.sprite.Group):
+    def __init__(self, *groups: pg.sprite.Group):
         super().__init__(*groups)
         self.image = load_image('mata_mosques.png', scale=0.35)   
         self.rect = self.image.get_rect()
-        self.rect.center = rect_center
         self.hitting = False
     
     def update(self) -> None:
@@ -102,8 +122,10 @@ def main() -> None:
     pg.mouse.set_visible(False)
     sprite_group = pg.sprite.Group()        # type: ignore
 
-    fly = Fly((SCREEN_WIDTH//4, SCREEN_HEIGHT//15), sprite_group)
-    fly_swatter = FlySwatter((SCREEN_WIDTH//2, SCREEN_HEIGHT//2), sprite_group)
+    fly = Fly(sprite_group)
+    fly_swatter = FlySwatter(sprite_group)
+    whiff_sound = load_sound("whiff.wav")
+    punch_sound = load_sound("punch.wav")
 
     while run:
         clock.tick(FPS)
@@ -111,8 +133,11 @@ def main() -> None:
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONDOWN:
                 if fly_swatter.hit(fly):
-                    fly.hitted()
-                    score += 1
+                    punch_sound.play() 
+                    points = fly.hitted()
+                    score += points
+                else:
+                    whiff_sound.play()  
             elif event.type == pg.MOUSEBUTTONUP:
                 fly_swatter.unhit()
             elif event.type == pg.QUIT:

@@ -15,7 +15,7 @@ clock = pg.time.Clock()
 pg.init()
 
 class MenuOption():
-    def __init__(self, text:str, bg_color: pg.Color = None) -> None:
+    def __init__(self, text:str, bg_color: pg.Color|None = None) -> None:
         self.text = text
         self.bg_color = bg_color
         self.clicked = False
@@ -34,18 +34,18 @@ class MenuOption():
         rect_box = box.get_rect(center=(x, y))
 
         pos = pg.mouse.get_pos()
-        if rect_box.collidepoint(pos):
+        if rect_box.collidepoint(pos) and self.bg_color:
             font = pg.font.Font('font/Workbench-Regular-VariableFont_BLED,SCAN.ttf', 45)
-            if pg.mouse.get_pressed()[0] == 1 and self.bg_color:
+            if pg.mouse.get_pressed()[0] == 1:
                 txt = font.render(self.text, True, BLACK)
                 box.fill(WHITE)
                 self.clicked = True
-            if pg.mouse.get_pressed()[0] == 0 and self.bg_color:
+            if pg.mouse.get_pressed()[0] == 0:
                 txt = font.render(self.text, True, WHITE)
-                if self.clicked:
-                    print(self.text)
                 box.fill(self.bg_color)
                 self.clicked = False
+                if self.clicked:
+                    print(self.text)
 
         # Volquem la imatge del text en el fons quadrat.
         rect_center:pg.Rect = txt.get_rect(center=box.get_rect().center)
