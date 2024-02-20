@@ -39,16 +39,17 @@ def create_tunnel() -> list[pg.Rect]:
     rectangles:list[pg.Rect] = []
     NUMBER_OF_RECTANGLES = SCREEN_WIDTH // RECTANGLE_WIDTH
     GAP = 300
-    MIN_HEIGHT = 20
+    MIN_HEIGHT = 40
     sign = -1
     x = 0
-    height = MARGIN +  100
+    height = MARGIN +  200
     i = 0
 
     while i < NUMBER_OF_RECTANGLES:
-        interval_length = random.randint(5,25)      # number of rectangles per interval.
-        slope = random.randint(5, 15) * sign        # The units are pixels.
+        interval_length = random.randint(15,25)      # number of rectangles per interval.
+        slope = random.randint(10, 20) * sign        # The units are pixels.
         sign = -sign
+        print(interval_length, slope, sign)
         for j in range(interval_length):
             height = (height + slope) if height>=MIN_HEIGHT else MIN_HEIGHT
             rect_sup = pg.Rect(x, MARGIN, RECTANGLE_WIDTH, height)
@@ -57,6 +58,7 @@ def create_tunnel() -> list[pg.Rect]:
             rectangles.append(rect_inf)
             x = x + RECTANGLE_WIDTH
         i = i + j
+    print(len(rectangles))
     return rectangles
 
 
@@ -65,6 +67,19 @@ def draw_tunnel(rectangles:list[pg.Rect]) -> None:
     for rectangle in rectangles:
         pg.draw.rect(screen, 'blue', rectangle)      
     pg.draw.rect(screen, 'dark gray', [0, 0, SCREEN_WIDTH, SCREEN_HEIGHT], MARGIN)
+
+def move_tunnel(rectangles:list[pg.Rect]) -> list[pg.Rect]:
+    SPEED = 5
+    for i in range(len(rectangles)):
+        rectangles[i].x -= SPEED
+        if rectangles[i].x + RECTANGLE_WIDTH < 0:
+            rectangles.pop(0)
+            rectangles.pop(1)
+            rect_sup = pg.Rect(0, MARGIN, RECTANGLE_WIDTH, 100)
+            rect_sup1 = pg.Rect(0, MARGIN, RECTANGLE_WIDTH, 100)
+            rectangles.append(rect_sup)
+            rectangles.append(rect_sup1)
+    return rectangles
 
 
 
@@ -85,6 +100,7 @@ def main() -> None:
                 run = False
 
         draw_tunnel(rectangles)
+        rectangles = move_tunnel(rectangles)
         pg.display.update()
     
     pg.quit()
