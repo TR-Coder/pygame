@@ -14,10 +14,11 @@ import random
 
 SCREEN_WIDTH = 2000
 SCREEN_HEIGHT = 900
-FPS = 60
+FPS = 160
 
 RECTANGLE_WIDTH = 20
 MARGIN = 10
+NUMBER_OF_RECTANGLES = SCREEN_WIDTH // RECTANGLE_WIDTH
 
 pg.init()
 font = pg.font.SysFont('Bauhaus 93', 60)
@@ -30,6 +31,35 @@ def draw_background() -> None:
     screen.blit(bg, (0, 0))
 
 
+sign = -1
+height = MARGIN +  200
+def create_interval(rectangles:list[pg.Rect]) -> int:
+    global sign
+    global height
+    GAP = 300
+    MIN_HEIGHT = 30
+    interval_length = random.randint(15,25)      # number of rectangles per interval.
+    slope = random.randint(10, 20) * sign        # The units are pixels.
+    sign = -sign
+    print(interval_length, slope, sign)
+    for j in range(interval_length):
+
+        height = (height + slope) if height>=MIN_HEIGHT else MIN_HEIGHT + slope      
+        upper_rect = pg.Rect(0, MARGIN, RECTANGLE_WIDTH, height)
+        rectangles.append(upper_rect)
+
+        d = 2*MARGIN + GAP + height
+        h = SCREEN_HEIGHT-d
+        if h < 0:
+            print('********',SCREEN_HEIGHT - d, height, slope)
+            height = h = SCREEN_HEIGHT - 2*MARGIN - GAP - MIN_HEIGHT + slope
+        lower_rect = pg.Rect(0, MARGIN+height+GAP, RECTANGLE_WIDTH, h)
+        rectangles.append(lower_rect)
+
+    return interval_length
+
+        
+
 ''' La idea per a crear el túnel és:
     Generem intervals de longitud aleatoria.
     Durant cada interval el túnel va pujant o baixant amb una inclinació determinada.
@@ -37,70 +67,49 @@ def draw_background() -> None:
 '''
 def create_tunnel() -> list[pg.Rect]:
     rectangles:list[pg.Rect] = []
-    NUMBER_OF_RECTANGLES = SCREEN_WIDTH // RECTANGLE_WIDTH
-    GAP = 300
-    MIN_HEIGHT = 40
-    sign = -1
-    x = 0
-    height = MARGIN +  200
     i = 0
-
     while i < NUMBER_OF_RECTANGLES:
-        interval_length = random.randint(15,25)      # number of rectangles per interval.
-        slope = random.randint(10, 20) * sign        # The units are pixels.
-        sign = -sign
-        print(interval_length, slope, sign)
-        for j in range(interval_length):
-            height = (height + slope) if height>=MIN_HEIGHT else MIN_HEIGHT
-            rect_sup = pg.Rect(x, MARGIN, RECTANGLE_WIDTH, height)
-            rect_inf = pg.Rect(x, MARGIN+height+GAP, RECTANGLE_WIDTH, SCREEN_HEIGHT-(MARGIN+height+GAP))
-            rectangles.append(rect_sup)
-            rectangles.append(rect_inf)
-            x = x + RECTANGLE_WIDTH
-        i = i + j
-    print(len(rectangles))
+        interval_length = create_interval(rectangles)
+        i = i + interval_length
     return rectangles
 
 
 
-def draw_tunnel(rectangles:list[pg.Rect]) -> None:
-    for rectangle in rectangles:
-        pg.draw.rect(screen, 'blue', rectangle)      
+def draw_tunnel(x:int, rectangles:list[pg.Rect]) -> None:
+    for upper_rect, lower_rect in zip(rectangles[0::2], rectangles[1::2]):
+        upper_rect.x = lower_rect.x = x
+        pg.draw.rect(screen, 'blue', upper_rect)      
+        pg.draw.rect(screen, 'blue', lower_rect)
+        x = x + RECTANGLE_WIDTH
     pg.draw.rect(screen, 'dark gray', [0, 0, SCREEN_WIDTH, SCREEN_HEIGHT], MARGIN)
-
-def move_tunnel(rectangles:list[pg.Rect]) -> list[pg.Rect]:
-    SPEED = 5
-    for i in range(len(rectangles)):
-        rectangles[i].x -= SPEED
-        if rectangles[i].x + RECTANGLE_WIDTH < 0:
-            rectangles.pop(0)
-            rectangles.pop(1)
-            rect_sup = pg.Rect(0, MARGIN, RECTANGLE_WIDTH, 100)
-            rect_sup1 = pg.Rect(0, MARGIN, RECTANGLE_WIDTH, 100)
-            rectangles.append(rect_sup)
-            rectangles.append(rect_sup1)
-    return rectangles
 
 
 
 def main() -> None:
-
-    rectangles:list[pg.Rect] = create_tunnel()
-    
-
     pg.display.set_caption('Missile')
-
+    rectangles:list[pg.Rect] = create_tunnel()
+    x = 0
 
     run = True
     while run:
         clock.tick(FPS)
+        draw_background()
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
 
-        draw_tunnel(rectangles)
-        rectangles = move_tunnel(rectangles)
+        draw_tunnel(x, rectangles)
+        if abs(x) >= RECTANGLE_WIDTH:
+            x += RECTANGLE_WIDTH - 6
+            rectangles.pop(0)
+            rectangles.pop(0)
+        else:
+            x -= 6
+
+        if len(rectangles)<=NUMBER_OF_RECTANGLES*2:
+            create_interval(rectangles)
+
         pg.display.update()
     
     pg.quit()
