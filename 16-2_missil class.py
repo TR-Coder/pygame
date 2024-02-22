@@ -58,9 +58,8 @@ class Tunnel:
             lower_rect = pg.Rect(0, MARGIN+self.upper_height+GAP, RECTANGLE_WIDTH, lower_height)
             self.rectangles.append(lower_rect)
 
-        return interval_length
-
-        
+        return interval_length      
+    
 
     ''' La idea per a crear el túnel és:
         Generem intervals de longitud aleatoria.
@@ -75,13 +74,14 @@ class Tunnel:
 
 
     def draw(self) -> None:
+        x = self.x
         for upper_rect, lower_rect in zip(self.rectangles[0::2], self.rectangles[1::2]):
-            upper_rect.x = lower_rect.x = self.x
+            upper_rect.x = lower_rect.x = x
             pg.draw.rect(screen, 'blue', upper_rect)      
             pg.draw.rect(screen, 'blue', lower_rect)
-            self.x = self.x + RECTANGLE_WIDTH
+            x = x + RECTANGLE_WIDTH
         pg.draw.rect(screen, 'dark gray', [0, 0, SCREEN_WIDTH, SCREEN_HEIGHT], MARGIN)
-        # self.update()
+        self.update()
 
     def update(self) -> None:
         if abs(self.x) >= RECTANGLE_WIDTH:
@@ -102,11 +102,9 @@ def main() -> None:
     while run:
         clock.tick(FPS)
         draw_background()
-
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
-
         tunnel.draw()
         pg.display.update()
     
