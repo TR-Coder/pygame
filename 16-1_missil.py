@@ -12,11 +12,11 @@
 import pygame as pg
 import random
 
-SCREEN_WIDTH = 2000
-SCREEN_HEIGHT = 900
-FPS = 160
+SCREEN_WIDTH = 900
+SCREEN_HEIGHT = 500
+FPS = 60
 
-RECTANGLE_WIDTH = 20
+RECTANGLE_WIDTH = 10
 MARGIN = 10
 NUMBER_OF_RECTANGLES = SCREEN_WIDTH // RECTANGLE_WIDTH
 
@@ -32,28 +32,26 @@ def draw_background() -> None:
 
 
 sign = -1
-height = MARGIN +  200
+upper_height = MARGIN +  200
 def create_interval(rectangles:list[pg.Rect]) -> int:
     global sign
-    global height
+    global upper_height
     GAP = 300
     MIN_HEIGHT = 30
     interval_length = random.randint(15,25)      # number of rectangles per interval.
-    slope = random.randint(10, 20) * sign        # The units are pixels.
+    slope = random.randint(5, 15) * sign        # The units are pixels.
     sign = -sign
-    print(interval_length, slope, sign)
     for j in range(interval_length):
 
-        height = (height + slope) if height>=MIN_HEIGHT else MIN_HEIGHT + slope      
-        upper_rect = pg.Rect(0, MARGIN, RECTANGLE_WIDTH, height)
+        upper_height = (upper_height + slope) if upper_height>=MIN_HEIGHT else MIN_HEIGHT + slope      
+        upper_rect = pg.Rect(0, MARGIN, RECTANGLE_WIDTH, upper_height)
         rectangles.append(upper_rect)
 
-        d = 2*MARGIN + GAP + height
-        h = SCREEN_HEIGHT-d
-        if h < 0:
-            print('********',SCREEN_HEIGHT - d, height, slope)
-            height = h = SCREEN_HEIGHT - 2*MARGIN - GAP - MIN_HEIGHT + slope
-        lower_rect = pg.Rect(0, MARGIN+height+GAP, RECTANGLE_WIDTH, h)
+        lower_height = SCREEN_HEIGHT - 2*MARGIN - GAP - upper_height
+        if lower_height < MIN_HEIGHT - MARGIN:
+            upper_height = lower_height = SCREEN_HEIGHT - MARGIN - GAP - MIN_HEIGHT
+
+        lower_rect = pg.Rect(0, MARGIN+upper_height+GAP, RECTANGLE_WIDTH, lower_height)
         rectangles.append(lower_rect)
 
     return interval_length
