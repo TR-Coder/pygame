@@ -20,20 +20,20 @@ WHITE = (255, 255, 255)
 #hide mouse cursor
 pygame.mouse.set_visible(False)
 
-#create soldier
-soldier = pygame.image.load('data\exp1.png').convert_alpha()
-soldier_rect = soldier.get_rect()
+#create cloud
+cloud = pygame.image.load('data\exp1.png').convert_alpha()
+cloud_rect = cloud.get_rect()
 
-soldier_mask = pygame.mask.from_surface(soldier)
+soldier_mask = pygame.mask.from_surface(cloud)
 mask_image = soldier_mask.to_surface()
 
-#create bullet and mask
-bullet = pygame.Surface((10, 10))
-bullet.fill(RED)
-bullet_mask = pygame.mask.from_surface(bullet)
+#create square and mask
+square = pygame.Surface((10, 10))
+square.fill(RED)
+square_mask = pygame.mask.from_surface(square)
 
-#position soldier rectangle
-soldier_rect.topleft = (350, 250)
+#position cloud rectangle
+cloud_rect.topleft = (350, 250)
 
 #game loop
 run = True
@@ -46,7 +46,7 @@ while run:
   screen.fill(BG)
 
   #check mask overlap
-  if soldier_mask.overlap(bullet_mask, (pos[0] - soldier_rect.x, pos[1] - soldier_rect.y)):
+  if soldier_mask.overlap(square_mask, (pos[0] - cloud_rect.x, pos[1] - cloud_rect.y)):
     col = RED
   else:
     col = GREEN
@@ -55,11 +55,11 @@ while run:
   screen.blit(mask_image, (0, 0))
 
   #draw soldier
-  screen.blit(soldier, soldier_rect)
+  screen.blit(cloud, cloud_rect)
 
   #draw rectangle
-  bullet.fill(col)
-  screen.blit(bullet, pos)
+  square.fill(col)
+  screen.blit(square, pos)
 
   #event handler
   for event in pygame.event.get():

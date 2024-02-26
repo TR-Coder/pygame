@@ -38,7 +38,7 @@ def create_interval(rectangles:list[pg.Rect]) -> int:
     global upper_height
     GAP = 300
     MIN_HEIGHT = 30
-    interval_length = random.randint(15,25)      # number of rectangles per interval.
+    interval_length = random.randint(30,40)      # number of rectangles per interval.
     slope = random.randint(5, 15) * sign        # The units are pixels.
     sign = -sign
     for j in range(interval_length):
