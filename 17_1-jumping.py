@@ -37,7 +37,10 @@ def draw_floor() -> None:
 # ===============================================================================
 def draw_runner(x:int, y:int) -> None:
     size = 20
-    pg.draw.rect(screen, GREEN, (x - size // 2, y - size // 2, size, size))
+    # rect = pg.Rect(0,0,size,size)
+    # rect.center = (x,y)
+    rect = pg.Rect(0, 0, size, size).move(x - size // 2, y - size // 2)
+    pg.draw.rect(screen, GREEN, rect)
 
 # ===============================================================================
 y_min = (SCREEN_HEIGHT - SCREEN_HEIGHT//8) - 10
@@ -55,9 +58,6 @@ def jump() -> None:
     global gravity
     global y_inc
     if jumping:
-        # if x < y_min:
-        #     y -= y_inc
-        #     y_inc -= gravity
         y -= y_inc
         y_inc -= gravity
         if y>y_min:
