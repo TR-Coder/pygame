@@ -212,3 +212,119 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 
 # https://www.tutorialspoint.com/pygame/pygame_display_modes.htm
 # https://www.pygame.org/docs/#tutorials-reference-label
+
+
+# import game, importa les classes, mètodes i atributs a l'espai de noms (name space) actual.
+# pg.init() i pg.quit() inicialitza i tanca l'aplicació de pg.
+# pg.display.set_mode((640,240)) assigna les dimensions i aparença de la finestra.
+# El bucle d'esdeveniments (event loop). 
+#   Els esdeveniments són coses que passen en un programa com: clics i moviment del ratolí, pulsació de tecles, etc.
+# El bucle infinit és el nucli d'un joc:
+'''
+while True:
+    for event in pygame.event.get():
+        print(event)
+'''
+# Per a eixir de l'aplicació detectarem la pulsació del botó de tancada de la finestra (QUIT event)
+'''
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+pygame.quit()
+'''
+
+# COLORS
+# Utilitzem el model RGB
+# Per a omplir la finestra amb un color fem:
+'''
+YELLOW = (255, 255, 0)
+screen.fill(YELLOW)
+pygame.display.update()
+'''
+
+# Exemple: programa que canvia el color de fons segons KEYDOWN events.
+'''
+if event.type == pygame.KEYDOWN:
+    if event.key == pygame.K_r:
+        background = RED
+    elif event.key == pygame.K_g:
+        background = GREEN
+
+screen.fill(background)
+pygame.display.update()
+'''
+
+# El mòdul pg.locals conté constants definides per pg.
+# from pygame.locals import *
+#
+# Permet escriure KEYDOWN enlloc de pg.KEYDOWN.
+#
+# Tecles modificadores (ALT, CTRL, CMD, etc.):
+#   KMOD_ALT, KMOD_CAPS, KMOD_CTRL, KMOD_LALT,
+#   KMOD_LCTRL, KMOD_LMETA, KMOD_LSHIFT, KMOD_META,
+#   KMOD_MODE, KMOD_NONE, KMOD_NUM, KMOD_RALT, KMOD_RCTRL,
+#   KMOD_RMETA, KMOD_RSHIFT, KMOD_SHIFT,
+# Nombres:
+#   K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9,
+# Caràcters especials:
+#   K_AMPERSAND, K_ASTERISK, K_AT, K_BACKQUOTE, K_BACKSLASH, K_BACKSPACE, K_BREAK,
+# Lletres de l'alfabet:
+#   K_a, K_b, K_c, K_d, K_e, K_f, K_g, K_h, K_i, K_j, K_k, K_l, K_m,
+#   K_n, K_o, K_p, K_q, K_r, K_s, K_t, K_u, K_v, K_w, K_x, K_y, K_z,
+#
+# Canviar el nom de la barra de títol de la finestra (caption):
+#   pygame.display.set_caption('caption')
+#
+# La class Rect representa una zona rectangular.
+# Per exemple, si ball és una imatge:
+# ball = pygame.image.load("ball.gif")
+# rect = ball.get_rect()
+#
+# L'objecte rect té atributs com:
+#   rect.left
+#   rect.top
+#   rect.right
+#   rect.bottom
+#
+# Podem moure un objecte Rect amb:
+# speed = [2, 2]
+# rect = rect.move(speed)
+#
+# El mòdul pg.draw permet dibuixar formes simples sobre qualsevol Surface (com la finestra del programa, una imatge o un dibuix).
+# Les formes simples són: rectangle, polygon, circle, ellipse.
+# Per exemple:
+#   rect(Surface, color, Rect, width) -> Rect
+#   polygon(Surface, color, pointlist, width) -> Rect
+#   circle(Surface, color, center, radius, width) -> Rect
+#
+#   Fixem-nos que retorna un objecte Rect que limita l'àrea modificada.
+#   La majoria de les funcions prenen un argument d'amplada. Si l'amplada és 0, la forma s'omple.
+#
+# Detecció del ratolí
+# La pulsació dels botons del ratoli genera  MOUSEBUTTONDOWN and MOUSEBUTTONUP events.
+# El moviment genera MOUSEMOTION event.
+'''
+for event in pygame.event.get():
+    if event.type == QUIT:
+        running = False
+    elif event.type == MOUSEBUTTONDOWN:
+        print(event)
+    elif event.type == MOUSEBUTTONUP:
+        print(event)
+    elif event.type == MOUSEMOTION:
+        print(event)
+'''
+# Exemple: dibuixar un rectangle amb el ratolí.
+
+
+
+
+
+
+
+
+
+
+
