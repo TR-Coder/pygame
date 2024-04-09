@@ -6,11 +6,13 @@
 #          ██║   ██║  ██║      ╚██████╗╚██████╔╝██████╔╝███████╗██║  ██║
 #          ╚═╝   ╚═╝  ╚═╝       ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝
 #
+#
+
 import pygame as pg
 
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 800
-FPS = 2
+FPS = 30
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 GREEN = (0, 255, 0)
@@ -37,7 +39,6 @@ class Timer():
             self.initial_time += elapsed_time
             return True
         return False
-    
 
 # ===========================================================================================
 class Rock(pg.sprite.Sprite):

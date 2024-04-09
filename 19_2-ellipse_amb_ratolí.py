@@ -42,14 +42,12 @@ while run:
         rect.topleft = min(x1,x2), min(y1, y2)
         rect.width = abs(x2-x1)
         rect.height = abs(y2-y1)
-        if pg.key.get_pressed()[pg.K_LCTRL] or pg.key.get_pressed()[pg.K_RCTRL]:
-            maxim = max(rect.width, rect.height)
-            rect.width = maxim
-            rect.height = maxim
-        pg.draw.rect(screen, color, rect, 2)
+        # pg.draw.rect(screen, color, rect, 2)
+        pg.draw.ellipse(screen, color, rect, 2)
 
     for rectangle in rectangles:
-        pg.draw.rect(screen, color, rectangle, 2)
+        # pg.draw.rect(screen, color, rectangle, 2)
+        pg.draw.ellipse(screen, color, rectangle, 2)
 
     pg.display.update()
     
