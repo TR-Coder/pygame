@@ -1,4 +1,5 @@
 import pygame as pg
+import math
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 400
@@ -11,6 +12,9 @@ BLUE = (0,0,255)
 
 def draw_background() -> None:
     screen.blit(bg, (0, 0))
+
+def ctrl_pressed() -> bool:
+    return pg.key.get_pressed()[pg.K_LCTRL] or pg.key.get_pressed()[pg.K_RCTRL]
 
 pg.init()
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -43,7 +47,12 @@ while run:
         rect.width = abs(x2-x1)
         rect.height = abs(y2-y1)
         # pg.draw.rect(screen, color, rect, 2)
-        pg.draw.ellipse(screen, color, rect, 2)
+
+        if ctrl_pressed():
+            radius = math.hypot(rect.width, rect.height)
+            pg.draw.circle(screen, BLACK, (x1,y1), radius, 2)
+        else:
+            pg.draw.ellipse(screen, color, rect, 2)
 
     for rectangle in rectangles:
         # pg.draw.rect(screen, color, rectangle, 2)
