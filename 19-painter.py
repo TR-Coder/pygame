@@ -1,6 +1,6 @@
 import pygame as pg
 from enum import Enum
-from typing import Tuple, List
+from typing import Tuple, List, Any
 
 pg.init()
 
@@ -45,7 +45,7 @@ class Ellipse():
         self.width = width
         self.color = color
 
-figures:List[any] = []
+figures:List[Any] = []
 current_figure:Figure_type = Figure_type.ELLIPSE
 current_rect: pg.Rect
 current_color:Color_ = BLACK
@@ -56,9 +56,7 @@ def draw_background() -> None:
     screen.blit(bg, (0, 0))
 
 def sign(value:int) -> int:
-    if value>=0:
-        return 1
-    return -1
+    return 1 if value>=0 else -1
 
 def ctrl_pressed() -> bool:
     return pg.key.get_pressed()[pg.K_LCTRL] or pg.key.get_pressed()[pg.K_RCTRL]
@@ -107,7 +105,12 @@ while run:
                 current_rect.height = maxim
                 x, y = x1 + maxim * sign(x2-x1), y1 + maxim * sign(y2-y1)
                 current_rect.topleft = min(x1,x), min(y1, y)
-            pg.draw.rect(screen, current_color, current_rect, 2)
+            pg.draw.rect(screen, current_color, current_rect, current_width)
+        if current_figure == Figure_type.ELLIPSE:
+            current_rect.topleft = min(x1,x2), min(y1, y2)
+            current_rect.width = abs(x2-x1)
+            current_rect.height = abs(y2-y1)
+            pg.draw.ellipse(screen, current_color, current_rect, current_width)
 
     for figure in figures:
         if isinstance(figure, Rectangle):
