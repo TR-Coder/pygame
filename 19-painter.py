@@ -19,6 +19,7 @@ class Figure_type(Enum):
     CIRCLE=1
     ELLIPSE=2
     RECTANGLE=3
+    STROKE=4
 
 class Button_type(Enum):
     LINE=0
@@ -30,6 +31,7 @@ class Button_type(Enum):
     MEDIUM=6
     LARGE=7
     UNDO=8
+    STROKE=9
 
 Coord_ = Tuple[int,int]
 Color_ = Tuple[int,int,int]
@@ -79,6 +81,17 @@ class Line:
         self.width = width
         self.color = color
 
+class Stroke:
+    def __init__(self, width:int, color:Color_) -> None:
+        x1y1:Coord_
+        self.width = width
+        self.color = color
+        self.lines:List[Coord_] = [x1y1]
+
+    def next(self, xy:Coord_) -> None:
+        self.lines.append(xy)
+
+
 figures:List[Any] = []
 current_figure:Figure_type = Figure_type.ELLIPSE
 current_rect: pg.Rect
@@ -103,32 +116,38 @@ def Taskbar() -> TaskBar:
     bt3 = Button(Button_type.RECTANGLE)
     pg.draw.rect(bt3.surface, BLACK, bt3.rect.inflate(-20,-20), 2)
 
-    bt4 = Button(Button_type.NOT_FILL)
-    pg.draw.ellipse(bt4.surface, BLACK, bt4.rect.inflate(-20,-20), 2)
+    bt4 = Button(Button_type.STROKE)
+    font = pg.font.SysFont('calibri', 50)
+    img_txt = font.render('~', True, BLACK)
+    rect_txt = img_txt.get_rect(center=bt4.rect.center)
+    bt4.surface.blit(img_txt, rect_txt)
 
-    bt5 = Button(Button_type.FILL)
-    pg.draw.ellipse(bt5.surface, BLACK, bt5.rect.inflate(-20,-20))
+    bt5 = Button(Button_type.NOT_FILL)
+    pg.draw.ellipse(bt5.surface, BLACK, bt4.rect.inflate(-20,-20), 2)
 
-    bt6 = Button(Button_type.SMALL)
-    pg.draw.line(bt6.surface, BLACK, (10,25), (40,25), 1)    
+    bt6 = Button(Button_type.FILL)
+    pg.draw.ellipse(bt6.surface, BLACK, bt5.rect.inflate(-20,-20))
 
-    bt7 = Button(Button_type.MEDIUM)
-    pg.draw.line(bt7.surface, BLACK, (10,25), (40,25), 3)
+    bt7 = Button(Button_type.SMALL)
+    pg.draw.line(bt7.surface, BLACK, (10,25), (40,25), 1)    
 
-    bt8 =Button(Button_type.LARGE)
-    pg.draw.line(bt8.surface, BLACK, (10,25), (40,25), 5)    
+    bt8 = Button(Button_type.MEDIUM)
+    pg.draw.line(bt8.surface, BLACK, (10,25), (40,25), 3)
 
-    bt9 = Button(Button_type.UNDO)
+    bt9 =Button(Button_type.LARGE)
+    pg.draw.line(bt9.surface, BLACK, (10,25), (40,25), 5)    
+
+    bt10 = Button(Button_type.UNDO)
     font = pg.font.SysFont('calibri',30,bold=True)
     img_txt = font.render('←', True, BLACK)
-    rect_txt = img_txt.get_rect(center=bt9.rect.center)
-    bt9.surface.blit(img_txt, rect_txt)    
+    rect_txt = img_txt.get_rect(center=bt10.rect.center)
+    bt10.surface.blit(img_txt, rect_txt)    
 
-    buttons = [bt1, bt2, bt3, bt4, bt5, bt6, bt7, bt8, bt9]
+    buttons = [bt1, bt2, bt3, bt4, bt5, bt6, bt7, bt8, bt9, bt10]
     tb = TaskBar(buttons)
     
     bt1.rect.center = tb.rect.center
-    for button,i in zip(buttons,[0,1,2, 4,5, 7,8,9, 11]):
+    for button,i in zip(buttons,[0,1,2,3, 5,6, 8,9,10, 11]):
         button.coord((30+(50+30)*i, bt1.rect.y))
         tb.surface.blit(button.surface, button.rect)
 
@@ -176,6 +195,8 @@ while run:
                             current_figure = Figure_type.ELLIPSE
                         elif button.type == Button_type.RECTANGLE:
                             current_figure = Figure_type.RECTANGLE
+                        elif button.type == Button_type.Stroke:
+                            current_figure = Figure_type.STROKE
                         elif button.type == Button_type.UNDO:
                             if figures:
                                 figures.pop()
@@ -197,6 +218,10 @@ while run:
                 line = Line((x1,y1), (x2,y2), current_width, current_color)
                 figures.append(line)
             drawing = False
+
+        if event.type == pg.MOUSEMOTION and event.button == 1 and drawing and current_figure == Figure_type.STROKE:
+            x2, y2 = pg.mouse.get_pos()
+            pg.draw.line(screen, current_color, (x1,y1), (x2, y2), current_width)
 
     if drawing:
         x2, y2 = pg.mouse.get_pos()
@@ -221,6 +246,7 @@ while run:
             
         elif current_figure == Figure_type.LINE:
             pg.draw.line(screen, current_color, (x1,y1), (x2, y2), current_width)
+
 
     for figure in figures:
         if isinstance(figure, Rectangle):
