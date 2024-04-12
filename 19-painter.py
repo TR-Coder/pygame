@@ -57,18 +57,25 @@ class TaskBar:
         self.surface = pg.Surface((width, 101))
         self.surface.fill(self.color)
         self.rect = self.surface.get_rect()
-        self.buttons:list[Button] = buttons
+        self.buttons:List[Button] = buttons
 
 
-class Rectangle():
+class Rectangle:
     def __init__(self, rect:pg.Rect, width: int, color:Color_):
         self.rect = rect
         self.width = width
         self.color = color
 
-class Ellipse():
+class Ellipse:
     def __init__(self, rect:pg.Rect, width: int, color:Color_):
         self.rect = rect
+        self.width = width
+        self.color = color
+
+class Line:
+    def __init__(self, x1y1:Coord_, x2y2:Coord_, width:int, color:Color_) -> None:
+        self.x1y1 = x1y1
+        self.x2y2 = x2y2
         self.width = width
         self.color = color
 
@@ -78,6 +85,10 @@ current_rect: pg.Rect
 current_color:Color_ = BLACK
 current_width:int = 2
 old_width = 1
+x1:int
+x2:int
+y1:int
+y2:int
 
 def draw_background() -> None:
     screen.fill(WHITE)
@@ -150,7 +161,7 @@ while run:
                         if button.type == Button_type.FILL:
                             old_width = current_width
                             current_width = 0
-                        if button.type == Button_type.NOT_FILL:
+                        elif button.type == Button_type.NOT_FILL:
                             if current_width == 0:
                                 current_width = old_width
                         elif button.type == Button_type.SMALL:
@@ -159,6 +170,15 @@ while run:
                             current_width = 3
                         elif button.type == Button_type.LARGE:
                             current_width = 5
+                        elif button.type == Button_type.LINE:
+                            current_figure = Figure_type.LINE
+                        elif button.type == Button_type.ELLIPSE:
+                            current_figure = Figure_type.ELLIPSE
+                        elif button.type == Button_type.RECTANGLE:
+                            current_figure = Figure_type.RECTANGLE
+                        elif button.type == Button_type.UNDO:
+                            if figures:
+                                figures.pop()
             else:
                 if current_figure in [Figure_type.RECTANGLE, Figure_type.ELLIPSE]:
                     current_rect = pg.Rect((x1,y1), (0, 0))
@@ -173,10 +193,14 @@ while run:
                 if current_rect.width>0 and current_rect.height>0:
                     ellipse = Ellipse(current_rect, current_width, current_color)
                     figures.append(ellipse)
+            elif current_figure == Figure_type.LINE:
+                line = Line((x1,y1), (x2,y2), current_width, current_color)
+                figures.append(line)
             drawing = False
 
     if drawing:
         x2, y2 = pg.mouse.get_pos()
+
         if current_figure == Figure_type.RECTANGLE:
             current_rect.topleft = min(x1,x2), min(y1, y2)
             current_rect.width = abs(x2-x1)
@@ -188,17 +212,23 @@ while run:
                 x, y = x1 + maxim * sign(x2-x1), y1 + maxim * sign(y2-y1)
                 current_rect.topleft = min(x1,x), min(y1, y)
             pg.draw.rect(screen, current_color, current_rect, current_width)
-        if current_figure == Figure_type.ELLIPSE:
+
+        elif current_figure == Figure_type.ELLIPSE:
             current_rect.topleft = min(x1,x2), min(y1, y2)
             current_rect.width = abs(x2-x1)
             current_rect.height = abs(y2-y1)
             pg.draw.ellipse(screen, current_color, current_rect, current_width)
+            
+        elif current_figure == Figure_type.LINE:
+            pg.draw.line(screen, current_color, (x1,y1), (x2, y2), current_width)
 
     for figure in figures:
         if isinstance(figure, Rectangle):
             pg.draw.rect(screen, figure.color, figure.rect, figure.width)
         elif isinstance(figure, Ellipse):
             pg.draw.ellipse(screen, figure.color, figure.rect, figure.width)
+        elif isinstance(figure, Line):
+            pg.draw.line(screen, figure.color, figure.x1y1, figure.x2y2, figure.width)
 
     screen.blit(taskbar.surface, (0,0))
     pg.display.update()
