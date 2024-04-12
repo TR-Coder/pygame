@@ -38,6 +38,13 @@ Color_ = Tuple[int,int,int]
 Group_ = pg.sprite.Group
 Surface_ = pg.Surface
 
+FPS=60
+clock = pg.time.Clock()
+
+undo_button_pressed = False
+hold_time_undo_button:float = 0
+dt = clock.tick(FPS) /1000               # FPS duration
+
 class Button:
     side = 50
     color = (169, 169, 200)
@@ -81,22 +88,12 @@ class Line:
         self.width = width
         self.color = color
 
-class Stroke:
-    def __init__(self, width:int, color:Color_) -> None:
-        x1y1:Coord_
-        self.width = width
-        self.color = color
-        self.lines:List[Coord_] = [x1y1]
-
-    def next(self, xy:Coord_) -> None:
-        self.lines.append(xy)
-
-
 figures:List[Any] = []
 current_figure:Figure_type = Figure_type.ELLIPSE
 current_rect: pg.Rect
 current_color:Color_ = BLACK
-current_width:int = 2
+current_width:int = 1
+current_line_width:int = 1
 old_width = 1
 x1:int
 x2:int
@@ -165,7 +162,7 @@ taskbar = Taskbar()
 
 run = True
 while run:
-
+    clock.tick(FPS)
     draw_background()
 
     for event in pg.event.get():
@@ -185,19 +182,23 @@ while run:
                                 current_width = old_width
                         elif button.type == Button_type.SMALL:
                             current_width = 1
+                            current_line_width = 1
                         elif button.type == Button_type.MEDIUM:
                             current_width = 3
+                            current_line_width = 3
                         elif button.type == Button_type.LARGE:
                             current_width = 5
+                            current_line_width = 5
                         elif button.type == Button_type.LINE:
                             current_figure = Figure_type.LINE
                         elif button.type == Button_type.ELLIPSE:
                             current_figure = Figure_type.ELLIPSE
                         elif button.type == Button_type.RECTANGLE:
                             current_figure = Figure_type.RECTANGLE
-                        elif button.type == Button_type.Stroke:
+                        elif button.type == Button_type.STROKE:
                             current_figure = Figure_type.STROKE
                         elif button.type == Button_type.UNDO:
+                            undo_button_pressed = True
                             if figures:
                                 figures.pop()
             else:
@@ -205,23 +206,29 @@ while run:
                     current_rect = pg.Rect((x1,y1), (0, 0))
                 drawing = True
 
-        if event.type == pg.MOUSEBUTTONUP and event.button == 1 and drawing:
-            if current_figure == Figure_type.RECTANGLE:
-                if current_rect.width>0 and current_rect.height>0:
-                    rectangle = Rectangle(current_rect, current_width, current_color)
-                    figures.append(rectangle)
-            elif current_figure == Figure_type.ELLIPSE:
-                if current_rect.width>0 and current_rect.height>0:
-                    ellipse = Ellipse(current_rect, current_width, current_color)
-                    figures.append(ellipse)
-            elif current_figure == Figure_type.LINE:
-                line = Line((x1,y1), (x2,y2), current_width, current_color)
-                figures.append(line)
+        if event.type == pg.MOUSEBUTTONUP and event.button == 1:
+            undo_button_pressed = False
+            hold_time_undo_button = 0
+            if drawing:
+                if current_figure == Figure_type.RECTANGLE:
+                    if current_rect.width>0 and current_rect.height>0:
+                        rectangle = Rectangle(current_rect, current_width, current_color)
+                        figures.append(rectangle)
+                elif current_figure == Figure_type.ELLIPSE:
+                    if current_rect.width>0 and current_rect.height>0:
+                        ellipse = Ellipse(current_rect, current_width, current_color)
+                        figures.append(ellipse)
+                elif current_figure == Figure_type.LINE:
+                    x2, y2 = pg.mouse.get_pos()
+                    line = Line((x1,y1), (x2,y2), current_line_width, current_color)
+                    figures.append(line)
             drawing = False
 
-        if event.type == pg.MOUSEMOTION and event.button == 1 and drawing and current_figure == Figure_type.STROKE:
+        if event.type == pg.MOUSEMOTION and drawing and current_figure==Figure_type.STROKE:
             x2, y2 = pg.mouse.get_pos()
-            pg.draw.line(screen, current_color, (x1,y1), (x2, y2), current_width)
+            line = Line((x1,y1), (x2,y2), current_line_width, current_color)
+            figures.append(line)
+            x1, y1 = x2, y2
 
     if drawing:
         x2, y2 = pg.mouse.get_pos()
@@ -244,8 +251,14 @@ while run:
             current_rect.height = abs(y2-y1)
             pg.draw.ellipse(screen, current_color, current_rect, current_width)
             
-        elif current_figure == Figure_type.LINE:
-            pg.draw.line(screen, current_color, (x1,y1), (x2, y2), current_width)
+        elif current_figure == Figure_type.LINE or current_figure == Figure_type.STROKE:
+            pg.draw.line(screen, current_color, (x1,y1), (x2, y2), current_line_width)
+    else:
+        if undo_button_pressed:
+            hold_time_undo_button += dt
+            if hold_time_undo_button > 1:
+                if figures:
+                    figures.pop()
 
 
     for figure in figures:
