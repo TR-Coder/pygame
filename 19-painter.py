@@ -1,3 +1,5 @@
+# C:\Users\tonir\AppData\Roaming\Code\User\settings.json
+
 import pygame as pg
 from enum import Enum
 from typing import Tuple, List, Any

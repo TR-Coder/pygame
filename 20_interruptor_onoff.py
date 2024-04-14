@@ -39,10 +39,10 @@ switch:Switch = Switch.OFF
 
 def draw_background(state:Switch) -> None:
     if state == Switch.OFF:
-        bg.fill(BLACK)
+        bg.fill(WHITE)
         screen.blit(bg, (0, 0))
     else:
-        bg.fill(WHITE)
+        bg.fill(BLACK)
         screen.blit(bg, (0, 0))
 
 

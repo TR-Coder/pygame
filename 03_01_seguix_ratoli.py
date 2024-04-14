@@ -26,7 +26,8 @@ while run:
 
   for event in pg.event.get():
     if event.type == pg.MOUSEMOTION:
-        target_x, target_y =  pg.mouse.get_pos()
+        # target_x, target_y =  pg.mouse.get_pos()
+        target_x, target_y =  event.pos
         dist = math.hypot(target_x - x, target_y - y)
         dx, dy = (target_x - x) / dist, (target_y - y) / dist
 
@@ -34,7 +35,7 @@ while run:
       run = False
 
   counter += 1
-  if counter == 10:
+  if counter == 5:
     x += 0 if int(x) == target_x else  dx * speed
     y += 0 if int(y) == target_y else  dy * speed
     counter = 0
