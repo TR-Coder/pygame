@@ -1,18 +1,22 @@
 import pygame as pg
 import math
 import random
+from enum import Enum
 
 pg.init()
 clock = pg.time.Clock()
 FPS = 60
 
-#game window
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 450
 BLUE = pg.Color(0, 0, 255)
 RED = pg.Color(255, 0, 0)
 BLACK = pg.Color(0,0,0)
 SIDE = 25
+
+class Type(Enum):
+    Reward=0
+    Obstacle=1
 
 class Timer():
     def __init__(self, ms: int):
@@ -26,11 +30,22 @@ class Timer():
             return True
         return False
     
-class Obstacle:
-    def __init__(self) -> None:
-      self.rect = pg.Rect(random.randint(0, SCREEN_WIDTH-SIDE), random.randint(0, SCREEN_HEIGHT-SIDE), SIDE, SIDE)
+def collides_with_figures(rect:pg.Rect) -> bool:
+  print(len(figures))
+  return any(rect.colliderect(figure.rect) for figure in figures)
+
+def calculate_position() -> pg.Rect:
+  while True:
+    rect = pg.Rect(random.randint(SIDE, SCREEN_WIDTH-SIDE), random.randint(SIDE, SCREEN_HEIGHT-SIDE), SIDE, SIDE)
+    if not collides_with_figures(rect):
+      return rect
+
+class Figure:
+    def __init__(self, type:Type) -> None:
+      self.rect = calculate_position()
       self.timer =  Timer(ms=random.randint(2000,4000))
       self.color = random.choice([RED, BLACK, BLUE])
+      self.type = type
     
     def move(self) -> None:
       # random_x, random_y = self.rect.x+random.randint(-20,20), self.rect.y+random.randint(-20,20)
@@ -49,14 +64,14 @@ speed = 1
 dx, dy = 0.0, 0.0
 counter = 0
 
-#create empty list, then create 10 obstacle rectangles using a loop and add to list
-obstacles:list[Obstacle] = [Obstacle() for _ in range(10)]
+# list with obstacle rectangles.
+# figures:list[Figure] = []
+figures = [Figure(type=Type.Obstacle) for _ in range(50)]
+# for _ in range(50):
+#    figures.append(Figure(type=Type.Obstacle))
 
-rect = pg.Rect(random.randint(SIDE, SCREEN_WIDTH-SIDE), random.randint(SIDE, SCREEN_HEIGHT-SIDE), SIDE, SIDE)
 
-while any(rect.colliderect(obstacle.rect) for obstacle in obstacles):
-    rect = pg.Rect(random.randint(SIDE, SCREEN_WIDTH-SIDE), random.randint(SIDE, SCREEN_HEIGHT-SIDE), SIDE, SIDE)
-
+rect = calculate_position()
 x:float = rect.x
 y:float = rect.y
 
@@ -81,12 +96,10 @@ while run:
     y += 0 if int(y) == target_y else  dy * speed
     counter = 0
   
-  for obstacle in reversed(obstacles):
-    if obstacle.timer.is_over():
-      obstacle.move()
-    pg.draw.rect(screen, obstacle.color, obstacle.rect)
-   
-       
+  for figure in figures:
+    if figure.timer.is_over():
+      figure.move()
+    pg.draw.rect(screen, figure.color, figure.rect)
 
   pg.display.flip()
 
