@@ -227,12 +227,21 @@ while True:
 '''
 # Per a eixir de l'aplicació detectarem la pulsació del botó de tancada de la finestra (QUIT event)
 '''
+import pygame as pg
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 450
+
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+# pg.display.set_caption('Following mouse')
+
+pg.init()
 running = True
 while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    for event in pg.event.get():
+        print(event)
+        if event.type == pg.QUIT:
             running = False
-pygame.quit()
+pg.quit()
 '''
 
 # COLORS
@@ -241,19 +250,23 @@ pygame.quit()
 '''
 YELLOW = (255, 255, 0)
 screen.fill(YELLOW)
-pygame.display.update()
 '''
+
+# Per a expressar un color podem utilitzar un tupla com (0,0,255). Per a expressar un color és suficient.
+# També podem usar un objecte tipus color com pg.Color(0,0,255). Un objecte color té métodes que permete
+# manipular els colors. 
+# Per expessar tranparencies utilitzen una tupla tipus (R, G, B, A). A va de 0 (transparent) a 255 (opac)
+
 
 # Exemple: programa que canvia el color de fons segons KEYDOWN events.
 '''
-if event.type == pygame.KEYDOWN:
-    if event.key == pygame.K_r:
+if event.type == pg.KEYDOWN:
+    if event.key == pg.K_r:
         background = RED
-    elif event.key == pygame.K_g:
+    elif event.key == pg.K_g:
         background = GREEN
 
 screen.fill(background)
-pygame.display.update()
 '''
 
 # El mòdul pg.locals conté constants definides per pg.
@@ -273,20 +286,63 @@ pygame.display.update()
 # Lletres de l'alfabet:
 #   K_a, K_b, K_c, K_d, K_e, K_f, K_g, K_h, K_i, K_j, K_k, K_l, K_m,
 #   K_n, K_o, K_p, K_q, K_r, K_s, K_t, K_u, K_v, K_w, K_x, K_y, K_z,
-#
+
+
+
 # Canviar el nom de la barra de títol de la finestra (caption):
 #   pygame.display.set_caption('caption')
-#
-# La class Rect representa una zona rectangular.
+
+# Quan dibuixem algo en la superficie (Surface) de pantalla en pygame, no se mostra immediatament per pantalla.
+# Pygame va guardan tot el que pintem i ho mostra tot a l'hora quan cridem a pg.display.update()
+# pg.display.update() actualitza la finestra que s'ha inicialitzat amb pg.display.set_mode().
+# Només hi ha una finestra. Si tenim diferents dissenys de finestres haurem de dibuixar estes superfíces en la superfície
+# de la finestra principal per què es mostren. Això se sol fer amb la funció blit.
+
+
+# La class Rect representa una zona rectangular, un objecte rectangle.
 # Per exemple, si ball és una imatge:
 # ball = pygame.image.load("ball.gif")
 # rect = ball.get_rect()
+
+# Els paràmetres que utiltza pg.Rect() són (x, y, width, height).
+# x,y indiquen la posició del rectangle (top left) i width i height les seus dimensions.
+
 #
 # L'objecte rect té atributs com:
 #   rect.left
 #   rect.top
 #   rect.right
 #   rect.bottom
+
+# Quan fem screen.blit(image, rect) estem dibuixant la imatge en la pantalla en ls posició x,y.
+# Tanmateix, blit() NO redimensiona la imatge perquè encaixe en la pantalla en la posició indicada per rectagle.
+# En este cas, el width i el height del rectangle no afecte la imatge. Si volem redimensionar-la utilitzarem pg.transform.scale()
+
+
+'''
+import pygame as pg
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 450
+
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pg.display.set_caption('Following mouse')
+
+image = pg.image.load('data/apple.png')
+rect = image.get_rect(center=screen.get_rect().center)
+screen.blit(image, rect)
+
+pg.init()
+running = True
+while running:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            running = False
+    pg.display.update()
+pg.quit()
+'''
+
+
 #
 # Podem moure un objecte Rect amb:
 # speed = [2, 2]
