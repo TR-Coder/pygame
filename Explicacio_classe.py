@@ -112,4 +112,62 @@ import pygame as pg
 # pg.quit()
 
 
+# ----------------------------------
+# Cua d'esdeveniment tipus Event
 
+# pg.init()
+# apple = pg.image.load('data/apple.png')
+# screen = pg.display.set_mode((500,400))
+
+
+# rect_apple = apple.get_rect()
+# rect_screen = screen.get_rect()
+# rect_apple.center = rect_screen.center
+
+# run = True
+# while run:
+#     screen.fill((255,0,0))
+#     for event in pg.event.get():        # Recorrer bucle esdeveniments
+#         if event.type == pg.QUIT:       # Verificar tipus esdeveniment
+#             run = False
+#         elif event.type == pg.KEYDOWN:
+#             if event.key == pg.K_UP:
+#                 rect_apple.y -= 10
+#             elif event.key == pg.K_DOWN:
+#                 rect_apple.y += 10
+#             elif event.key == pg.K_RIGHT:
+#                 rect_apple.x += 10
+#             elif event.key == pg.K_LEFT:
+#                 rect_apple.x -= 10
+
+#     screen.blit(apple, rect_apple)
+#     pg.display.update()
+
+# pg.quit()
+
+# ----------------------------------
+
+# pg.init()
+# apple = pg.image.load('data/apple.png')
+# screen = pg.display.set_mode((500,400))
+
+
+# rect_apple = apple.get_rect()
+# rect_screen = screen.get_rect()
+# rect_apple.center = rect_screen.center
+
+# run = True
+# while run:
+#     screen.fill((255,0,0))
+#     for event in pg.event.get():        # Recorrer bucle esdeveniments
+#         if event.type == pg.QUIT:       # Verificar tipus esdeveniment
+#             run = False
+#         elif event.type == pg.MOUSEMOTION:
+#             ## target_x, target_y =  pg.mouse.get_pos()
+#             x, y =  event.pos
+#             rect_apple.center = x,y
+
+#     screen.blit(apple, rect_apple)
+#     pg.display.update()
+
+# pg.quit()
