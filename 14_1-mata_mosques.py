@@ -1,9 +1,13 @@
+# pip install pygame --pre
+# python3.8
+
 import pygame as pg
 import os
 import random
+from typing import Tuple
 
-SCREEN_WIDTH = 2000
-SCREEN_HEIGHT = 900
+SCREEN_WIDTH = 1500
+SCREEN_HEIGHT = 800
 FPS = 60
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
@@ -22,8 +26,8 @@ assets_directory = os.path.join(working_directory, 'data')
 def load_image(name: str, scale:float=1) -> pg.Surface:
     img_path:str   = os.path.join(assets_directory, name)
     img:pg.Surface = pg.image.load(img_path).convert_alpha()    # convert_alpha() fa que funcione la transparència del .png
-    size:tuple[int, int] = img.get_size()
-    scaled_size:tuple[float, float] = (size[0] * scale, size[1] * scale)
+    size:Tuple[int, int] = img.get_size()
+    scaled_size:Tuple[float, float] = (size[0] * scale, size[1] * scale)
     return pg.transform.scale(img, scaled_size)
 
 # -----------------------------------------------------------------------------------------------
@@ -43,7 +47,7 @@ class Fly(pg.sprite.Sprite):
         self.hunted = False
         self.counter = 0
 
-    def random_coordenates(self) -> tuple[int,int]:
+    def random_coordenates(self):
         x = random.randint(0, SCREEN_WIDTH-self.rect.width)
         y = random.randint(0, SCREEN_HEIGHT-self.rect.height)
         return x,y

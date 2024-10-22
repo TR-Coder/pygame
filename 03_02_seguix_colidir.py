@@ -2,10 +2,10 @@ import pygame as pg
 import math
 import random
 from enum import Enum
+from typing import Tuple, Union, Optional, List
 
 pg.init()
 clock = pg.time.Clock()
-FPS = 60
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 450
@@ -31,7 +31,7 @@ class Timer():
             return True
         return False
     
-def collides_with_figures(rect:pg.Rect, exclude: pg.Rect|None = None) -> bool:
+def collides_with_figures(rect:pg.Rect, exclude: Union[pg.Rect,None] = None) -> bool:
   return any(rect.colliderect(f.rect) for f in figures if f.rect != exclude)
 
 def calculate_position() -> pg.Rect:
@@ -70,11 +70,10 @@ target_x, target_y = SCREEN_WIDTH/2, SCREEN_HEIGHT/2
 speed = 1
 dx, dy = 0.0, 0.0
 counter = 0
-points = 100
 
 # list with obstacle figures and reward.
-figures:list[Figure] = []
-for _ in range(30):
+figures:List[Figure] = []
+for _ in range(20):
    figures.append(Figure(type=Type.Obstacle))
 figure_reward = Figure(type=Type.Reward)
 figures.append(figure_reward)
@@ -87,7 +86,6 @@ circle_rect = pg.Rect(x-SIDE, y-SIDE, SIDE*2, SIDE*2)
 
 run = True
 while run:
-  # clock.tick(FPS)
   screen.fill("turquoise1")
   pg.draw.circle(screen, BLUE, (int(x),int(y)), 20)
 
@@ -101,7 +99,7 @@ while run:
       run = False
 
   counter += 1
-  if counter == 20:
+  if counter == 10:
     x += 0 if int(x) == target_x else  dx * speed
     y += 0 if int(y) == target_y else  dy * speed
     circle_rect = pg.Rect(x-SIDE, y-SIDE, SIDE*2, SIDE*2)
@@ -115,10 +113,8 @@ while run:
       pg.draw.rect(screen, color, figure.rect)
 
       if figure.rect.colliderect(circle_rect):
-          points += -1 if figure.type == Type.Obstacle else 10
-          print(points)
           figures[-1] = Figure(type=Type.Reward)
 
-  pg.display.flip()
+  pg.display.update()
 
 pg.quit()

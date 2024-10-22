@@ -1,5 +1,6 @@
 import pygame as pg
 from enum import Enum
+from typing import Tuple, Union, Optional
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 400
@@ -17,8 +18,8 @@ bg = pg.Surface(screen.get_size())
 bg.fill(WHITE)
 clock = pg.time.Clock()
 
-Coord_ = tuple[int,int]
-Color_ = tuple[int,int,int]
+Coord_ = Tuple[int,int]
+Color_ = Tuple[int,int,int]
 Group_ = pg.sprite.Group
 
 class MouseClick(Enum):

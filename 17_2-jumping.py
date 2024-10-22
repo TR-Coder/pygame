@@ -9,6 +9,7 @@
 #
 
 import pygame as pg
+from typing import Tuple, Union, Optional, List
 
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 800
@@ -79,7 +80,7 @@ class Runner(pg.sprite.Sprite):
         self.runner_mask:pg.Mask = self.mask_running[0]
   
 
-    def get_images(self, path: str, images_number: int, scale: float) ->  tuple[list[pg.Surface], list[pg.Mask]]:
+    def get_images(self, path: str, images_number: int, scale: float) ->  Tuple[List[pg.Surface], List[pg.Mask]]:
         images:list[pg.Surface] = []
         masks:list[pg.Mask] = []
         for i in range(1,images_number):

@@ -21,7 +21,7 @@ WHITE = (255, 255, 255)
 pygame.mouse.set_visible(False)
 
 #create cloud
-cloud = pygame.image.load('data\exp1.png').convert_alpha()
+cloud = pygame.image.load('data/exp1.png').convert_alpha()
 cloud_rect = cloud.get_rect()
 
 soldier_mask = pygame.mask.from_surface(cloud)

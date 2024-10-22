@@ -1,4 +1,5 @@
 import pygame as pg
+from typing import Tuple, Union, Optional
 
 W, H = 600, 400
 WxH = (W,H)
@@ -15,7 +16,7 @@ clock = pg.time.Clock()
 pg.init()
 
 class MenuOption():
-    def __init__(self, text:str, bg_color: pg.Color|None = None) -> None:
+    def __init__(self, text:str, bg_color: Union[pg.Color, None]=None) -> None:
         self.text = text
         self.bg_color = bg_color
         self.clicked = False
@@ -50,27 +51,22 @@ class MenuOption():
         # Volquem la imatge del text en el fons quadrat.
         rect_center:pg.Rect = txt.get_rect(center=box.get_rect().center)
         box.blit(txt, rect_center)
-
         screen.blit(box, rect_box)
 
 menu_option_1 = MenuOption(text='MENÚ')
 menu_option_2 = MenuOption(text='- Opció 1 -', bg_color=BLUE)
 menu_option_3 = MenuOption(text='- Opció 2 -', bg_color=BLUE)
+y = H // 6
 
 running = True
 while running:
     clock.tick(FPS)
-
-    y = H // 6
     menu_option_1.draw(W//2, y)
-    y += 60
-    menu_option_2.draw(W//2, y)
-    y += 60
-    menu_option_3.draw(W//2, y)
-
+    menu_option_2.draw(W//2, y+60)
+    menu_option_3.draw(W//2, y+60*2)
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
-    pg.display.flip()
+    pg.display.update()

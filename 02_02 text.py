@@ -1,5 +1,5 @@
 import pygame as pg
-
+from typing import Tuple
 
 W, H = 600, 400
 WxH = (W,H)
@@ -16,18 +16,19 @@ clock = pg.time.Clock()
 pg.init()
 
 
-def surface_text(text:str, width:int, height:int, background_color: pg.Color) -> pg.Surface:
+def surface_text(text:str, background_color: pg.Color) -> pg.Surface:
     font:pg.font.Font = pg.font.SysFont('Calibri',40)
 
     # Covertim el text en una imatge (surface) amb font.render()
     txt_img:pg.Surface = font.render(text, True, WHITE)
 
     # Posem el text sobre un fons quadrat. Creem una surface i la pintem d'un color.
-    if width is None and height is None:
-        r = txt_img.get_rect()
-        canvas = pg.Surface((r.width, r.height))
-    else:
-        canvas = pg.Surface((width,height))
+    aux = txt_img.get_rect()
+    
+    print(aux.top, aux.left, aux.width, aux.height)
+    rect = txt_img.get_rect().inflate(100,100)
+    print(rect.top, rect.left, rect.width, rect.height)
+    canvas = pg.Surface((rect.width, rect.height))
 
     canvas.fill(background_color)
  
@@ -38,9 +39,7 @@ def surface_text(text:str, width:int, height:int, background_color: pg.Color) ->
     canvas.blit(txt_img, coordinate)
     return canvas
      
-
-txt = surface_text(text='Text per pantalla', width=W//2, height=H//2, background_color=BLUE)
-
+txt = surface_text(text='Text per pantalla', background_color=BLUE)
 rect = txt.get_rect(center=(W/2, H/2))
 screen.blit(txt, rect)
 
@@ -51,12 +50,5 @@ while running:
         if event.type == pg.QUIT:
             running = False
 
-    pg.display.flip()
+    pg.display.update()
 
-
-
-
-
-# FER UN MENU
-# https://www.youtube.ceom/watch?v=b_DkQrJxpck
-# https://www.youtube.com/watch?v=a5JWrd7Y_14&list=PLVFWKkB2K-TnsGDz7xrN27IpCU5I1bery

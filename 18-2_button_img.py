@@ -1,6 +1,7 @@
 import pygame as pg
 from enum import Enum
 import os
+from typing import Tuple, Union, Optional, List
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 400
@@ -18,8 +19,8 @@ bg = pg.Surface(screen.get_size())
 bg.fill(WHITE)
 clock = pg.time.Clock()
 
-Coord_ = tuple[int,int]
-Color_ = tuple[int,int,int]
+Coord_ = Tuple[int,int]
+Color_ = Tuple[int,int,int]
 Group_ = pg.sprite.Group
 Surface_ = pg.Surface
 
@@ -55,10 +56,10 @@ class Button(pg.sprite.Sprite):
 
 working_directory = os.path.split(os.path.abspath(__file__))[0]
 assets_directory = os.path.join(working_directory, 'data')
-images_list: list[pg.Surface] = []
+images_list: List[pg.Surface] = []
 img_path:str = os.path.join(assets_directory, 'push.png')
 image:pg.Surface = pg.image.load(img_path).convert_alpha()   # convert_alpha() fa que funcione la transparència del .png
-size:tuple[int, int] = image.get_size()
+size:Tuple[int, int] = image.get_size()
 width, height = size[0], size[1]
 scale = 0.1
 image = pg.transform.scale(image, (width * scale, height * scale))         

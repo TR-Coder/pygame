@@ -4,7 +4,7 @@ from pygame.locals import *
 pygame.init()
 
 clock = pygame.time.Clock()
-fps = 60
+fps = 1000
 
 screen_width = 600
 screen_height = 800
@@ -38,7 +38,7 @@ class Explosion(pygame.sprite.Sprite):
 		self.counter = 0
 
 	def update(self):
-		explosion_speed = 5
+		explosion_speed = 3
 		self.counter += 1
 		
 		if self.counter >= explosion_speed:
@@ -57,17 +57,7 @@ run = True
 while run:
 
 	clock.tick(fps)
-
-	#draw background
 	draw_bg()
-
-	# Draws the contained Sprites to the Surface argument. This uses the Sprite.image attribute for the source surface, and Sprite.rect for the position.
-	explosion_group.draw(screen)
-	explosion_group.update()
-	# Calls the update() method on all Sprites in the Group. The base Sprite class has an update method that takes any number of arguments and does nothing.
-	# The arguments passed to Group.update() will be passed to each Sprite.
-
-	#event handler
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			run = False
@@ -76,7 +66,9 @@ while run:
 			explosion = Explosion(pos[0], pos[1])
 			explosion_group.add(explosion)
 
-
+	explosion_group.update()
+	explosion_group.draw(screen)
+	
 	pygame.display.update()
 
 pygame.quit()	

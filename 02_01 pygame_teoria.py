@@ -2,6 +2,13 @@
 # Gateron G Pro 2.0 Switch
 # glorious gmmk pro
 
+
+# Instal·lar
+# python3 -m pip install pygame 
+#
+# Provar instal·lació
+# python3 -m pygame.examples.aliens
+
 # ==========
 # Surface
 # ==========

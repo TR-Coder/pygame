@@ -1,5 +1,6 @@
 import pygame
 import random
+from typing import Tuple, Union, Optional
 
 pygame.init()
 
@@ -10,7 +11,7 @@ SCREEN_HEIGHT = 450
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Drag And Drop')
 
-active_box:int|None = None
+active_box:Union[int,None] = None
 boxes = []
 for i in range(5):
   x = random.randint(50, 700)
@@ -36,15 +37,16 @@ while run:
           if box.collidepoint(event.pos):
             active_box = num
 
-    if event.type == pygame.MOUSEBUTTONUP:
+    elif event.type == pygame.MOUSEBUTTONUP:
       if event.button == 1:
         active_box = None
 
-    if event.type == pygame.MOUSEMOTION:
+    elif event.type == pygame.MOUSEMOTION:
+      print(event.rel)
       if active_box is not None:
         boxes[active_box].move_ip(event.rel)
 
-    if event.type == pygame.QUIT:
+    elif event.type == pygame.QUIT:
       run = False
 
   pygame.display.flip()
