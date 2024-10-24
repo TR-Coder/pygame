@@ -24,6 +24,7 @@ class MainMenu():
         self.menu = menu
         self.font = pg.font.Font('font/Workbench-Regular-VariableFont_BLED,SCAN.ttf', 30)
         self.menu_box_list:list[pg.Rect] = []
+        self.menu_box = None
         self.option_selected:None|int = None    # Indica la opció sobre la que hem fet click amb el ratolí.
         self.index:None|int = None              # Indica la opció sobre la que està el ratolí.
         self.clicked = False                    # Commuta entre False i True quan fem click estant sobre qualsevol opció del menú.
@@ -38,7 +39,7 @@ class MainMenu():
         surface = pg.Surface((W,font_height * 1.75))
         surface.fill(WHITE)
         screen.blit(surface, (0,0))
-        surface_box = surface.get_rect()
+        self.menu_box = surface.get_rect()
 
         # Pintem les opcions del menú dins del requadre
         lletra_width, lletra_height = self.font.size('M')   # Separació (em) entre les paraules del menú.
@@ -49,7 +50,7 @@ class MainMenu():
             if (self.index is not None) and (i == self.index):
                 txt = self.font.render(option, True, BLUE)
             txt_box:pg.Rect = txt.get_rect()
-            txt_box.centery = surface_box.centery
+            txt_box.centery = self.menu_box.centery
             txt_box.x += delta
             screen.blit(txt, txt_box)
             self.menu_box_list.append(txt_box)
@@ -70,10 +71,11 @@ class MainMenu():
         surface = pg.Surface((max_width,font_height * len(submenu[index])))
         surface.fill(BLUE)
         x = self.menu_box_list[index].left
-        screen.blit(surface, (x,font_height * 1.75))
+        screen.blit(surface, (x,self.menu_box_list[index].bottom))
 
         # surface_box = surface.get_rect()
-        delta:int = int(font_height*1.75)
+        # delta:int = int(font_height*1.75)
+        delta:int = self.menu_box.bottom
 
         for i, option in enumerate(submenu[index]):
             txt:pg.Surface = self.font.render(option, True, WHITE)
