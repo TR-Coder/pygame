@@ -2,7 +2,6 @@ import pygame as pg
 import math
 import random
 from enum import Enum
-from typing import Tuple, Union, Optional, List
 
 pg.init()
 clock = pg.time.Clock()
@@ -31,35 +30,36 @@ class Timer():
             return True
         return False
     
-def collides_with_figures(rect:pg.Rect, exclude: Union[pg.Rect,None] = None) -> bool:
-  return any(rect.colliderect(f.rect) for f in figures if f.rect != exclude)
+def collides_with_other_figures(rect:pg.Rect, exclude_me:pg.Rect|None = None) -> bool:
+  return any(rect.colliderect(f.rect) for f in figures if f.rect != exclude_me)
 
-def calculate_position() -> pg.Rect:
+def generate_random_position() -> pg.Rect:
   while True:
     rect = pg.Rect(random.randint(SIDE, SCREEN_WIDTH-SIDE), random.randint(SIDE, SCREEN_HEIGHT-SIDE), SIDE, SIDE)
-    if not collides_with_figures(rect):
+    if not collides_with_other_figures(rect):
       return rect
 
 class Figure:
     def __init__(self, type:Type) -> None:
-      self.rect = calculate_position()
+      self.rect = generate_random_position()
       self.timer =  Timer(ms=random.randint(1000,2000))
       self.color = random.choice([RED, BLACK, BLUE])
       self.type = type
   
-    def move(self) -> None:
+    def random_move(self, pixeles:int) -> None:
       # Per a limitar el valor d'una variable x a un interval [a,b] podem fer:  x = max(min(x, b), a)
-      # min(x,b) assegura que x no supera b, si ho fa retorna b.
-      # max(min(x, b), a) assegura que el valor resultant no és menor que a. 
-      # Si el resultat de min(x, b) es menor que a, aleshores retorna a.
+      # min(x,b)=min(b,x) assegura que x<=b
+      # max(x,b)=max(b,x) assegura que x>=b
+      #   max(min(x, b), a) assegura que el x>=a i x<=b
       new_rect = pg.Rect.copy(self.rect)
-      x_min = y_min = 0
       x_max = SCREEN_WIDTH - SIDE
       y_max = SCREEN_HEIGHT - SIDE
       while True:
-        new_rect.x = max(x_min, min(x_max, new_rect.x + random.randint(-20, 20)))
-        new_rect.y = max(y_min, min(y_max, new_rect.y + random.randint(-20, 20)))
-        if not collides_with_figures(new_rect, self.rect):
+        random_dx = new_rect.x + random.randint(-pixeles, pixeles)
+        random_dy = new_rect.y + random.randint(-pixeles, pixeles)
+        new_rect.x = max(0, min(x_max, random_dx))
+        new_rect.y = max(0, min(y_max, random_dy))
+        if not collides_with_other_figures(new_rect, exclude_me=self.rect):
           self.rect = new_rect
           return
 
@@ -72,14 +72,14 @@ dx, dy = 0.0, 0.0
 counter = 0
 
 # list with obstacle figures and reward.
-figures:List[Figure] = []
+figures:list[Figure] = []
 for _ in range(20):
    figures.append(Figure(type=Type.Obstacle))
-figure_reward = Figure(type=Type.Reward)
+figure_reward = Figure(type=Type.Reward)      # La figura reward sempre està en l'última posició de la llista (en la -1).
 figures.append(figure_reward)
 
 
-rect = calculate_position()
+rect = generate_random_position()
 x:float = rect.centerx
 y:float = rect.centery
 circle_rect = pg.Rect(x-SIDE, y-SIDE, SIDE*2, SIDE*2)
@@ -106,14 +106,14 @@ while run:
     counter = 0
   
   for figure in figures:
-      if figure.timer.is_over():
-          figure.move()
+    if figure.timer.is_over():
+      figure.random_move(pixeles=20)
 
-      color = figure.color if figure.type == Type.Obstacle else YELLOW
-      pg.draw.rect(screen, color, figure.rect)
+    color = figure.color if figure.type == Type.Obstacle else YELLOW
+    pg.draw.rect(screen, color, figure.rect)
 
-      if figure.rect.colliderect(circle_rect):
-          figures[-1] = Figure(type=Type.Reward)
+    if figure.rect.colliderect(circle_rect):
+        figures[-1] = Figure(type=Type.Reward)
 
   pg.display.update()
 

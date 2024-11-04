@@ -6,23 +6,21 @@ from typing import Tuple, Union, Optional, List
 pg.init()
 
 #game window
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 450
+W = 800
+H = 450
 BLUE = pg.Color(0, 0, 255)
 
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pg.display.set_mode((W, H))
 pg.display.set_caption('Following mouse')
 
-target_x, target_y = SCREEN_WIDTH/2, SCREEN_HEIGHT/2
-x, y = SCREEN_WIDTH/2, SCREEN_HEIGHT/2
+mouse_x, mouse_y = W/2, H/2
+sprite_x, sprite_y = W/2, H/2
 
-# -----------------
-img = pg.image.load(f'data/mosquit.png').convert_alpha()
-size:Tuple[int, int] = img.get_size()
-scaled_size:Tuple[float, float] = (size[0] * 0.15, size[1] * 0.15)
+img = pg.image.load('data/mosquit.png').convert_alpha()
+size_x, size_y = img.get_size()
+scaled_size = (size_x * 0.15, size_y * 0.15)
 img = pg.transform.scale(img, scaled_size)
-rect = img.get_rect()
-# -----------------
+sprite_rect = img.get_rect()
   
 speed = 1
 dx, dy = 0.0, 0.0
@@ -35,24 +33,22 @@ while run:
 
   for event in pg.event.get():
     if event.type == pg.MOUSEMOTION:
-        target_x, target_y =  event.pos
-        # ----
-        dist = math.hypot(target_x - rect.centerx, target_y - rect.centery)
-        dx, dy = (target_x - rect.centerx) / dist, (target_y - rect.centery) / dist
-        # ----
+        mouse_x, mouse_y =  event.pos
+        dist = math.hypot(mouse_x - sprite_rect.centerx, mouse_y - sprite_rect.centery)
+        dx, dy = (mouse_x - sprite_rect.centerx) / dist, (mouse_y - sprite_rect.centery) / dist
 
     if event.type == pg.QUIT:
       run = False
 
   counter += 1
   if counter == 5:
-    x += 0 if int(x) == target_x else  dx * speed
-    y += 0 if int(y) == target_y else  dy * speed
+    sprite_x += 0 if int(sprite_x) == mouse_x else  dx * speed
+    sprite_y += 0 if int(sprite_y) == mouse_y else  dy * speed
     counter = 0
 
   # -----
-  rect.center = int(x), int(y)
-  screen.blit(img, rect)
+  sprite_rect.center = int(sprite_x), int(sprite_y)
+  screen.blit(img, sprite_rect)
   # -----
 
   pg.display.flip()

@@ -4,14 +4,14 @@ from typing import Tuple, Union, Optional
 
 pygame.init()
 
-#game window
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 450
+W = 800
+H = 450
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((W, H))
 pygame.display.set_caption('Drag And Drop')
 
-active_box:Union[int,None] = None
+active_box:int|None = None
+
 boxes = []
 for i in range(5):
   x = random.randint(50, 700)
@@ -26,7 +26,6 @@ while run:
 
   screen.fill("turquoise1")
 
-  #update and draw items
   for box in boxes:
     pygame.draw.rect(screen, "purple", box)
 
@@ -36,6 +35,7 @@ while run:
         for num, box in enumerate(boxes):
           if box.collidepoint(event.pos):
             active_box = num
+            break          
 
     elif event.type == pygame.MOUSEBUTTONUP:
       if event.button == 1:
