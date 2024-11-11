@@ -128,13 +128,34 @@ l = Tetromino(0xf0a100,[
 tetrominos = [i,s,t,z,j,o,l]
 
 
-class Tetro:
-    def __init__(self, x:int, y:int, tetromino:Tetromino):
-        self.x:int = x
-        self.y:int = y
-        self.tetromino:Tetromino = tetromino
-        self.position:int = 0    
+class Timer():
+    def __init__(self, ms: int):
+        self.ticks = ms
+        self.initial_time = pg.time.get_ticks()
 
+    def time_out(self) -> bool:
+        now = pg.time.get_ticks()
+        if (now - self.initial_time) > self.ticks:
+            self.initial_time = now
+            return True
+        return False
+
+
+class Piece:
+    def __init__(self, row:int, column:int, tetromino:Tetromino):
+        self.row:int = row
+        self.column:int = column
+        self.tetromino:Tetromino = tetromino
+        self.position:int = 0
+
+        self.orientation:list[str] = self.tetromino.shape[self.position]
+        self.color:int = self.tetromino.color
+        self.last_line:str = self.orientation[-1]
+        self.width:int = len(self.orientation[0])
+        self.height = 0
+        for line in self.orientation:
+            if line != '···' and line != '····':
+                self.height += 1  
 
 class Tetris:
     def __init__(self, rows, columns, tetromino_width, tetrominos) -> None:
@@ -143,40 +164,50 @@ class Tetris:
         self.tetromino_width = tetromino_width
         self.tetrominos = tetrominos
         self.grid = [[0 for _ in range(columns)] for _ in range(rows)]
-        self.current:Tetro = self.random_tetro()
+        self.current_piece:Piece = self.random_piece()
         self.score = 0
 
-    def random_tetro(self) -> Tetro:
+    def random_piece(self) -> Piece:
         tetromino = random.choice(self.tetrominos)
-        return Tetro(self.columns//2, 0, tetromino) 
+        return Piece(0, self.columns//2, tetromino) 
 
 
     def draw_grid(self):
-        # for y, row in enumerate(self.grid):
-        #     for x, cell in enumerate(row):
-        #         if cell == 0:
-        #             pg.draw.rect(screen, WHITE, (x * self.tetromino_width, y * self.tetromino_width, self.tetromino_width - 1 , self.tetromino_width - 1), 2)
+        for y, row in enumerate(self.grid):
+            for x, cell in enumerate(row):
+                if cell == 0:
+                    pg.draw.rect(screen, WHITE, (x * self.tetromino_width, y * self.tetromino_width, self.tetromino_width - 1 , self.tetromino_width - 1), 2)
 
-        if self.current:
-            current_shape = self.current.tetromino.shape[self.current.position]
-            i = 0
-            for line in current_shape:
+        if self.current_piece:
+            r = 0
+            for line in self.current_piece.orientation:
                 if line != '···' and line != '····':
-                    for j,square in enumerate(line):
-                        if square=='X':
-                            x = (self.current.x + j) * self.tetromino_width 
-                            y = (self.current.y + i) * self.tetromino_width
-                            color = self.current.tetromino.color
-                            pg.draw.rect(screen, color, (x, y, tetromino_width - 1 , tetromino_width - 1))
-                    i += 1
+                    for c,square in enumerate(line):
+                        if square == 'X':
+                            row = (self.current_piece.row + r) * self.tetromino_width 
+                            column = (self.current_piece.column + c) * self.tetromino_width
+                            color = self.current_piece.color
+                            pg.draw.rect(screen, color, (column, row, tetromino_width - 1 , tetromino_width - 1))
+                    r += 1
         
 
     
-    def move_tetro(self):
-        pass
+    def move_tetro(self, timer:Timer) -> None:
+        if timer.time_out():
+            r = self.current_piece.row + self.current_piece.height
+            if r < self.rows:
+                self.current_piece.row += 1
+                c = self.current_piece.column
+                w = self.current_piece.width
+                next_grid = self.grid[r][c:c+w]
+                last_line = self.current_piece.last_line
+                print(last_line,next_grid,r,c,c+w)
+            else:
+                self.current_piece.row = 0
                 
 
 tetris = Tetris(rows, columns, tetromino_width, tetrominos)
+timer = Timer(150)
 
 run = True
 while run:
@@ -186,6 +217,7 @@ while run:
         if event.type == pg.QUIT:
             run = False
 
+    tetris.move_tetro(timer)
     tetris.draw_grid()
 
     pg.display.update()
