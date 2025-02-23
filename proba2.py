@@ -1,36 +1,49 @@
 import pygame as pg
 
-W, H = 600, 400
-FPS = 60
-WHITE = pg.Color(255,255,255)
-BLACK = pg.Color(0,0,0)
-BLUE = pg.Color(0,0,255)
+def input_text(screen, font, prompt):
+    input_box = pg.Rect(100, 100, 140, 32)
+    color_inactive = pg.Color('lightskyblue3')
+    color_active = pg.Color('dodgerblue2')
+    color = color_inactive
+    active = False
+    text = ''
+    done = False
 
-screen = pg.display.set_mode((W,H))
-BG_color = BLUE
-clock = pg.time.Clock()
+    while not done:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                done = True
+            if event.type == pg.MOUSEBUTTONDOWN:
+                # Si l'usuari fa clic a la caixa d'entrada
+                if input_box.collidepoint(event.pos):
+                    active = not active
+                else:
+                    active = False
+                color = color_active if active else color_inactive
+            if event.type == pg.KEYDOWN:
+                if active:
+                    if event.key == pg.K_RETURN:
+                        done = True
+                    elif event.key == pg.K_BACKSPACE:
+                        text = text[:-1]
+                    else:
+                        text += event.unicode
+
+        screen.fill((30, 30, 30))
+        txt_surface = font.render(prompt + text, True, color)
+        width = max(200, txt_surface.get_width() + 10)
+        input_box.w = width
+        screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+        pg.draw.rect(screen, color, input_box, 2)
+
+        pg.display.flip()
+
+    return text
+
 pg.init()
-
-font:pg.font.Font = pg.font.SysFont('Calibri',40)
-
-txt:pg.Surface = font.render('Hola què tal?', True, WHITE)
-txt_rect = txt.get_rect()
-
-img_bg = pg.Surface((txt_rect.width + 250,txt_rect.height + 50))
-img_bg.fill(BG_color)
-
-txt_rect.center = img_bg.get_rect().center
-img_bg.blit(txt, txt_rect)
-
-img_bg_rect = img_bg.get_rect()
-img_bg_rect.center = (W//2, H//2)
-screen.blit(img_bg, img_bg_rect)
-
-run = True
-while run:
-    clock.tick(FPS)
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            run = False
-    pg.display.update()
-
+screen = pg.display.set_mode((640, 480))
+font = pg.font.Font(None, 32)
+prompt = "Introdueix el teu text: "
+user_text = input_text(screen, font, prompt)
+print("Text introduït:", user_text)
+pg.quit()

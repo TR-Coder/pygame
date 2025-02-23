@@ -30,21 +30,18 @@ class Timer():
             return True
         return False
 
-def load_image(name:str, scale:float) -> pg.Surface:
-    working_directory = os.path.split(os.path.abspath(__file__))[0]
-    assets_directory = os.path.join(working_directory, 'data')
-    img_path:str = os.path.join(assets_directory, name)
+
+def load_image(name: str, scale: float) -> pg.Surface:
+    img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', name)
     image:pg.Surface = pg.image.load(img_path).convert_alpha()
-    size:tuple[int, int] = image.get_size()
-    width, height = size[0], size[1]
-    image = pg.transform.scale(image, (width * scale, height * scale))  
+    image = pg.transform.scale(image, (int(image.get_width() * scale), int(image.get_height() * scale)))
     return image
 
+
 def load_sound(name: str) -> pg.mixer.Sound:
-    working_directory = os.path.split(os.path.abspath(__file__))[0]
-    assets_directory = os.path.join(working_directory, 'data')
-    sound_path:str = os.path.join(assets_directory, name)
+    sound_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', name)
     return pg.mixer.Sound(sound_path)
+
 
 image = load_image('despertador.png', .25)
 image_rect = image.get_rect(center=screen.get_rect().center)
