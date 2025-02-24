@@ -10,20 +10,7 @@ pg.init()
 screen = pg.display.set_mode((W,H))
 bg = pg.Surface(screen.get_size())
 bg.fill(WHITE)
-clock = pg.time.Clock()
-
-class Timer():
-    def __init__(self, ms: int):
-        self.ticks = ms
-        self.initial_time = pg.time.get_ticks()
-
-    def is_over(self) -> bool:
-        elapsed_time = pg.time.get_ticks() - self.initial_time
-        if elapsed_time > self.ticks:
-            self.initial_time += elapsed_time
-            return True
-        return False
-    
+   
 
 def load_image(name:str, scale:float=1) -> pg.Surface:
     img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', name)
@@ -38,64 +25,62 @@ def load_sound(name: str) -> pg.mixer.Sound:
 
 
 image_metronome = load_image('metronom.png')
-image_bar = load_image('barra.png')
 
+image_bar_first = load_image('barra.png')
+bar_rect = image_bar_first.get_rect()
+image_bar = pg.Surface((bar_rect.width, bar_rect.height*2), pg.SRCALPHA).convert_alpha()
+# image_bar.fill((0, 0, 0, 0))  # alternativa a  pg.SRCALPHA
+image_bar.blit(image_bar_first, (0,0))
 
 
 def draw_background() -> None:
     screen.blit(bg, (0, 0))
 
 
-# def rotate_image(image:pg.Surface, angle:float, pivot:tuple[int,int]) -> tuple[pg.Surface, tuple[int, int]]:
-#     rect = image.get_rect(center=pivot)  
-#     rotated_image = pg.transform.rotate(image, angle)
-#     rotated_rect = rotated_image.get_rect(center=rect.center)
-#     return rotated_image, rotated_rect.topleft
-
-
-def rotate_image(image: pg.Surface, angle: float, pivot: tuple[int, int]) -> tuple[pg.Surface, tuple[int, int]]:
-    w, h = image.get_size()
-    pivot_offset = (pivot[0] - w // 2, pivot[1] - h // 2)
-    rotated_image = pg.transform.rotate(image, angle)
-    new_w, new_h = rotated_image.get_size()
-    new_x = pivot[0] - new_w // 2 + pivot_offset[0]
-    new_y = pivot[1] - new_h // 2 + pivot_offset[1]
-    return rotated_image, (new_x, new_y)
-
-
-
-def draw_metronome() -> None:
-    center_metronome = image_metronome.get_rect(center=screen.get_rect().center)
+def draw_metronome(degree:int=0) -> None:
+    screen_center = screen.get_rect().center
+    center_metronome = image_metronome.get_rect(center=screen_center)
     screen.blit(image_metronome, center_metronome)
-    
-    center_bar = image_bar.get_rect(center=center_metronome.center)
-    y = center_bar.y + image_bar.get_height()//2
-    x = center_bar.x
-    image_rotate_bar, (x, y) = rotate_image(image_bar, 0, (x,y))
-    # image_rotate_bar = image_bar
-    screen.blit(image_rotate_bar, (x,y))
 
-    # screen.blit(image_rotate_bar, center_bar)
+    rotated_bar = pg.transform.rotate(image_bar, degree)
+    center_bar = rotated_bar.get_rect(center=screen_center)
+    screen.blit(rotated_bar, center_bar.topleft)
+
+
+def angle(ms:int) -> int:
+# temps mínim de 400 ms i màxim de 800 ms,
+# A 800 ms o més lent (>=800) li corresponen 45º.
+# A 400 ms o més ràpid (<=400) li corresponen 10º.
+# Entre [400,800] ms l'angle serà proporcional:
+#   com 45º - 10º = 35graus i   800 - 400 = 400ms
+#   són 35/400 graus/ms
+#   angle = 10º + (temps-400) * (35/400)
+    if ms>=800:
+        return 45
+    if ms<=400:
+        return 10
+    
+    return int(10 + (ms - 400) * (35/400))
+
 
 
 def main() -> None:
-    timer_1 = Timer(ms=0)
-    vibrate:bool = False
+    ms = 1000
+    degree = angle(ms)
     run = True
     while run:
-        clock.tick(FPS)
         draw_background()
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                pass
-            
-        if vibrate and timer_1.is_over():
-            pass
+                run = False
 
-        draw_metronome()
+        pg.time.wait(ms)    
+        draw_metronome(degree)
+        degree *= -1
         pg.display.update()
+
     pg.quit()
 
 if __name__ == '__main__':
