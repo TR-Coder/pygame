@@ -76,14 +76,9 @@ class Fly(pg.sprite.Sprite):
             self.image = self.image_alive
             self.hunted = False      
 
-    def hitted(self) -> int:
-        '''Retorna els punts en què hem d'incrementar el score'''
+    def hitted(self) -> None:
         if not self.hunted:
             self.hunted = True
-            self.original = self.image
-            return 1
-        return 0
-    
 
 # -----------------------------------------------------------------------------------------------
 class FlySwatter(pg.sprite.Sprite):
@@ -138,8 +133,8 @@ def main() -> None:
             if event.type == pg.MOUSEBUTTONDOWN:
                 if fly_swatter.hit(fly):
                     punch_sound.play() 
-                    points = fly.hitted()
-                    score += points
+                    fly.hitted()
+                    score += 1
                 else:
                     whiff_sound.play()  
             elif event.type == pg.MOUSEBUTTONUP:
