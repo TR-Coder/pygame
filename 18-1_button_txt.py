@@ -1,6 +1,6 @@
 import pygame as pg
 from enum import Enum
-from typing import Tuple, Union, Optional
+from typing import Tuple
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 400

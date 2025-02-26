@@ -1,5 +1,6 @@
 import pygame as pg
 import os
+import components
 
 W = 800
 H = 800
@@ -62,7 +63,7 @@ def angle(ms:int) -> int:
     
     return int(10 + (ms - 400) * (35/400))
 
-
+tick_sound  = load_sound('metronome.mp3')
 
 def main() -> None:
     ms = 1000
@@ -78,6 +79,7 @@ def main() -> None:
 
         pg.time.wait(ms)    
         draw_metronome(degree)
+        tick_sound.play()
         degree *= -1
         pg.display.update()
 
