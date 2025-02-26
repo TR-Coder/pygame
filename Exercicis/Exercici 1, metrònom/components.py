@@ -1,20 +1,18 @@
 import pygame as pg
+import os
 
-WHITE = (255,255,255)
-BLACK = (0,0,0)
-GREEN = (0,255,0)
-
+# ------------------------------------------------------------------------------------------------------
 class Button(pg.sprite.Sprite):
     def __init__(self, x:int, y:int, radius:int, group: pg.sprite.Group,  bg_color: tuple[int,int,int]|None = None, font_color: tuple[int,int,int]|None = None, image:pg.Surface|None = None, symbol:str|None = None) -> None:
         super().__init__(group)
         if image is None and symbol is None:
             raise Exception('Indica una imatge o un símbol')
+        
         self.x = x
         self.y = y
         self.radius = radius
-        
         self.color = (0,0,0,0) if bg_color is None else bg_color 
-        self.font_color = WHITE if font_color is None else font_color 
+        self.font_color = (255,255,255) if font_color is None else font_color 
         
         if image is not None:
             self.image = image
@@ -41,9 +39,7 @@ class Button(pg.sprite.Sprite):
             self.rect.x, self.rect.y = self.x, self.y
             self.clicked = False
 
-
-
-
+# ------------------------------------------------------------------------------------------------------
 class Timer():
     def __init__(self, ms: int, first_time_over:bool=False):
         self.ms = ms
@@ -58,4 +54,16 @@ class Timer():
             return True
         return False
     
-    
+# ------------------------------------------------------------------------------------------------------
+def load_image(relative_path_name:str, scale:float=1) -> pg.Surface:
+    img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path_name)
+    image:pg.Surface = pg.image.load(img_path).convert_alpha()
+    image = pg.transform.scale(image, (int(image.get_width() * scale), int(image.get_height() * scale)))
+    return image
+
+# ------------------------------------------------------------------------------------------------------
+def load_sound(relative_path_name:str) -> pg.mixer.Sound:
+    sound_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path_name)
+    return pg.mixer.Sound(sound_path)
+
+# ------------------------------------------------------------------------------------------------------

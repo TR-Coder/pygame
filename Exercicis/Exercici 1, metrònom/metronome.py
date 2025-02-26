@@ -1,6 +1,5 @@
 import pygame as pg
 import os
-import components
 
 W = 800
 H = 800

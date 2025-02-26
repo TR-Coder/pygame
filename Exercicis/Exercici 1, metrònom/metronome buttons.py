@@ -20,6 +20,8 @@ class MouseClick(Enum):
 
 pg.init()
 screen = pg.display.set_mode((W,H))
+screen_center = screen.get_rect().center
+
 bg = pg.Surface(screen.get_size())
 bg.fill(WHITE)
 
@@ -37,8 +39,10 @@ def load_sound(name: str) -> pg.mixer.Sound:
 
 
 image_metronome = load_image('metronom.png')
-image_bar_first = load_image('barra.png')
+center_metronome = image_metronome.get_rect(center=screen_center)
 
+
+image_bar_first = load_image('barra.png')
 bar_rect = image_bar_first.get_rect()
 image_bar = pg.Surface((bar_rect.width, bar_rect.height*2), pg.SRCALPHA)
 image_bar.blit(image_bar_first, (0,0))
@@ -48,11 +52,10 @@ def draw_background() -> None:
     screen.blit(bg, (0, 0))
 
 
-def draw_metronome(degree:int=0) -> None:
-    screen_center = screen.get_rect().center
-    center_metronome = image_metronome.get_rect(center=screen_center)
+def draw_metronome() -> None:
     screen.blit(image_metronome, center_metronome)
 
+def draw_bar(degree:int=0) -> None:
     rotated_bar = pg.transform.rotate(image_bar, degree)
     center_bar = rotated_bar.get_rect(center=screen_center)
     screen.blit(rotated_bar, center_bar.topleft)
@@ -98,9 +101,12 @@ def main() -> None:
 
         if timer.is_over():  
             draw_background()
-            draw_metronome(degree)
+            draw_metronome()
+            draw_bar(degree)
             tick_sound.play()
-            degree *= -1      
+            degree *= -1
+        else:
+            pass
         
         if mouse_click != MouseClick.NOT_PRESSED:
             buttons_group.update(mouse_click == MouseClick.DOWN)
