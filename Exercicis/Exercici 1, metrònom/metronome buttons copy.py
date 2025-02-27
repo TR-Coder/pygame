@@ -81,15 +81,16 @@ def clear_screen() -> None:
     screen.blit(bg, (0, 0))
 # ------------------------------------------------------------------------------------------------------
     
-def draw_time() -> None:
-    now = dt.datetime.now()
-    hms = now.strftime("%H:%M:%S")
-    surface = font.render(hms, True, BLACK)
+def draw_speed(ms:int) -> None:
+    surface = font.render(f'ms = {ms}', True, BLACK)
     screen.blit(surface, (50, 50))
+
 
 # ------------------------------------------------------------------------------------------------------
 def main() -> None:
     
+    MAX_SPEED = 500
+    MIN_SPEED = 1500
     speed = 1000
      
     buttons_group:pg.sprite.Group = pg.sprite.Group()
@@ -127,13 +128,20 @@ def main() -> None:
         if mouse_click != components.MouseClick.NOT_PRESSED:
             buttons_group.update(mouse_click)
             if button_plus.clicked:
-                speed -= 100
-                metronome_bar = metronome_bar.new(speed)        # alternativa
+                if speed <= MAX_SPEED:
+                    speed = MAX_SPEED
+                else:
+                    speed -= 100
+                    metronome_bar = metronome_bar.new(speed)        # alternativa
             if button_minus.clicked:
-                speed += 100
-                metronome_bar = metronome_bar.new(speed)                 
+                if speed >= MIN_SPEED:
+                    speed = MIN_SPEED
+                else:
+                    speed += 100
+                    metronome_bar = metronome_bar.new(speed)                 
 
         buttons_group.draw(screen)
+        draw_speed(ms=speed)
         
         pg.display.update()
         
@@ -146,5 +154,6 @@ if __name__ == '__main__':
     pg.display.set_caption('Metronome')
     bg = pg.Surface(screen.get_size())
     bg.fill(WHITE)
+    font = pg.font.Font(None, 36)
     main()
     pg.quit()
