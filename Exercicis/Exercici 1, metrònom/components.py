@@ -1,5 +1,12 @@
 import pygame as pg
+from enum import Enum
 import os
+
+# ------------------------------------------------------------------------------------------------------
+class MouseClick(Enum):
+    NOT_PRESSED=0
+    DOWN=1
+    UP=2
 
 # ------------------------------------------------------------------------------------------------------
 class Button(pg.sprite.Sprite):
@@ -30,9 +37,9 @@ class Button(pg.sprite.Sprite):
         self.rect.y = y
         self.clicked = False
 
-    def update(self, mouse_clicked_down: bool) -> None:
+    def update(self, mouse_clicked: bool) -> None:
         mouse_position = pg.mouse.get_pos()
-        if self.rect.collidepoint(mouse_position) and mouse_clicked_down:
+        if self.rect.collidepoint(mouse_position) and mouse_clicked == MouseClick.DOWN:
             self.rect.move_ip(2,2)
             self.clicked = True
         elif self.clicked:

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pygame as pg
 from enum import Enum
 import components
@@ -10,20 +11,12 @@ WHITE = (255,255,255)
 BLACK = (0,0,0)
 BLUE = (0,0,255)
 
-
-# ------------------------------------------------------------------------------------------------------
-class MouseClick(Enum):
-    NOT_PRESSED=0
-    DOWN=1
-    UP=2
-
 # ------------------------------------------------------------------------------------------------------
 class MetronomeBase(pg.sprite.Sprite):
     def __init__(self, group: pg.sprite.Group):
         super().__init__(group)
         self.image = components.load_image(r'assets/metronom.png')
         self.rect = self.image.get_rect(center=screen_center)       # En el centre de la pantalla.
-
 
 # ------------------------------------------------------------------------------------------------------
 class MetronomeBar(pg.sprite.Sprite):
@@ -34,6 +27,7 @@ class MetronomeBar(pg.sprite.Sprite):
  
     def __init__(self, ms:int, group: pg.sprite.Group):
         super().__init__(group)
+        self.group = group
         self.timer = components.Timer(ms, first_time_over=True)
         self.degree = self.calculate_angle(ms)
         img_bar = self.load_image()
@@ -68,13 +62,6 @@ class MetronomeBar(pg.sprite.Sprite):
                 return 10
             return int(10 + (ms - 400) * (35/400))    
 
-
-    def faster(self, ms:int) -> None:
-        pass
-
-    def slower(self, ms:int) -> None:
-        pass     
-
     def update(self) -> None:
         if self.position == MetronomeBar.Position.LEFT:
             self.image = self.img_left
@@ -84,18 +71,27 @@ class MetronomeBar(pg.sprite.Sprite):
             self.image = self.img_right
             self.rect = self.rect_right
             self.position = MetronomeBar.Position.LEFT
-
-    
-
+            
+    def new(self, speed:int) -> MetronomeBar:
+        self.group.remove(self)
+        return MetronomeBar(ms=speed, group=self.group)
 
 # ------------------------------------------------------------------------------------------------------
 def clear_screen() -> None:
     screen.blit(bg, (0, 0))
-
+# ------------------------------------------------------------------------------------------------------
+    
+def draw_time() -> None:
+    now = dt.datetime.now()
+    hms = now.strftime("%H:%M:%S")
+    surface = font.render(hms, True, BLACK)
+    screen.blit(surface, (50, 50))
 
 # ------------------------------------------------------------------------------------------------------
 def main() -> None:
-
+    
+    speed = 1000
+     
     buttons_group:pg.sprite.Group = pg.sprite.Group()
     metronome_group:pg.sprite.Group = pg.sprite.Group()
 
@@ -103,30 +99,24 @@ def main() -> None:
     button_minus =components.Button(x=30, y=450, radius=55, bg_color=BLUE, symbol='-', group=buttons_group)
 
     MetronomeBase(group=metronome_group)
-    metronome_bar = MetronomeBar(ms=1000, group=metronome_group)
+    metronome_bar = MetronomeBar(ms=speed, group=metronome_group)
 
     tick_sound  = components.load_sound(r'assets/metronome.mp3')
     
     main_loop = True
     while main_loop:
 
-        mouse_click = MouseClick.NOT_PRESSED
+        mouse_click = components.MouseClick.NOT_PRESSED
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 main_loop = False
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_click = MouseClick.DOWN
+                mouse_click = components.MouseClick.DOWN
             if event.type == pg.MOUSEBUTTONUP and event.button == 1:
-                mouse_click = MouseClick.UP
+                mouse_click = components.MouseClick.UP
 
         clear_screen()
-
-        if button_plus.clicked:
-            print('clicked +')
-
-        if button_minus.clicked:
-            print('clicked -')
 
         if metronome_bar.timer.is_over():  
             metronome_group.update()
@@ -134,13 +124,19 @@ def main() -> None:
 
         metronome_group.draw(screen)
 
-        if mouse_click != MouseClick.NOT_PRESSED:
-            buttons_group.update(mouse_click == MouseClick.DOWN)
+        if mouse_click != components.MouseClick.NOT_PRESSED:
+            buttons_group.update(mouse_click)
+            if button_plus.clicked:
+                speed -= 100
+                metronome_bar = metronome_bar.new(speed)        # alternativa
+            if button_minus.clicked:
+                speed += 100
+                metronome_bar = metronome_bar.new(speed)                 
 
         buttons_group.draw(screen)
         
         pg.display.update()
-
+        
 
 # ------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
