@@ -1,10 +1,10 @@
+from __future__ import annotations
 import pygame as pg
 import os
 from enum import Enum
-from typing import Tuple
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 400
+W = 800
+H = 400
 FPS = 60
 WHITE = (255,255,255)
 BLACK = (0,0,0)
@@ -13,29 +13,13 @@ class Switch(Enum):
     ON=0
     OFF=1
 
-pg.init()
-screen = pg.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 
-bg = pg.Surface(screen.get_size())
-bg.fill(WHITE)
-
-
-def load_image(name:str, scale:float) -> pg.Surface:
-    working_directory = os.path.split(os.path.abspath(__file__))[0]
-    assets_directory = os.path.join(working_directory, 'data')
-    img_path:str = os.path.join(assets_directory, name)
+def load_image(name:str, scale:float=1) -> pg.Surface:
+    img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),name)
     image:pg.Surface = pg.image.load(img_path).convert_alpha()
-    size:Tuple[int, int] = image.get_size()
-    width, height = size[0], size[1]
+    width, height = image.get_size()
     image = pg.transform.scale(image, (width * scale, height * scale))  
     return image
-
-    
-
-image_off = load_image('interruptor_off.png', 1)
-image_on = load_image('interruptor_on.png', 1)
-clock = pg.time.Clock()
-switch:Switch = Switch.OFF
 
 
 def draw_background(state:Switch) -> None:
@@ -49,17 +33,21 @@ def draw_background(state:Switch) -> None:
 
 def draw_switch(state:Switch) -> None:
     if state == Switch.OFF:
-        rect = image_off.get_rect(center=screen.get_rect().center)
+        # rect = image_off.get_rect(center=screen.get_rect().center)
+        rect = image_off.get_rect()
+        rect.center=screen.get_rect().center
         screen.blit(image_off, rect)
     else:
         rect = image_on.get_rect(center=screen.get_rect().center)
         screen.blit(image_on, rect)
 
 def main() -> None:
-    global switch
+
+    switch:Switch = Switch.OFF
+
     run = True
     while run:
-        clock.tick(FPS)
+        # clock.tick(FPS)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
@@ -69,7 +57,19 @@ def main() -> None:
         draw_background(state=switch)
         draw_switch(state=switch)
         pg.display.update()
-    pg.quit()
 
 if __name__ == '__main__':
+    pg.init()
+
+    screen = pg.display.set_mode((W,H))
+    bg = pg.Surface(screen.get_size())
+    bg.fill(WHITE)
+
+    image_off = load_image('data/interruptor_off.png')
+    image_on = load_image('data/interruptor_on.png')
+
+    clock = pg.time.Clock()
+
     main()
+
+    pg.quit()
