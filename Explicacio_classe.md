@@ -6,7 +6,7 @@ Els flux de dades que genera un vídeojoc seguix una jerarquia de capes que flui
             ↓
     Motor gràfic (Pygame, Unity, Unreal)            # El motor gràfic crida funcions d’una API gràfica (ex.: OpenGL).
             ↓
-    API gràfica (OpenGL, DirectX, Vulkan, SDL)      # L’API gràfica envia ordres al driver de la GPU.
+    API gràfica (OpenGL, DirectX, Vulkan, SDL)      # L’API gràfica (Application Programming Interfaces) envia ordres al driver de la GPU.
             ↓
     Driver de la targeta gràfica                    # El driver traduïx les ordres en un llenguatge que la targeta gràfica entén.
             ↓
@@ -15,7 +15,11 @@ Els flux de dades que genera un vídeojoc seguix una jerarquia de capes que flui
     Pantalla (Monitor)
 
 
-Per a entendre-ho millor possem un símil: El motor gràfic enten ordres visuals com pinta un quadrat de tals dimensions en tal posició amb un color o una textura de fons determinada. L'API gràfica trandirira estes ordres an un llenguatque que el driver de la gràfica puga entrendre. El driver de la GPU ajustarà i optimitzarà este ordres perquè la targeta gràfica les execute de la manera més eficient. Finalment la GPU generarà els pixels que es mostraran per pantalla.
+Per a entendre-ho millor possem un símil: El motor gràfic enten ordres visuals com pinta un quadrat de tals dimensions en tal posició amb un color o una textura de fons determinada. L'API gràfica convertirà estes ordres a un llenguatque que el driver de la gràfica puga entrendre. El driver de la GPU ajustarà i optimitzarà este ordres perquè la targeta gràfica les execute de la manera més eficient. Finalment la GPU generarà els pixels que es mostraran per pantalla.
+
+Exemple d'ús d'Unity: https://www.youtube.com/watch?v=x3FbFa843Pw
+
+Què és una API gràfica: https://www.youtube.com/watch?v=wHNpT0ash3M
 
 
 Per exemple:
@@ -38,7 +42,7 @@ La funció principal d'una API gràfica és actuar com una interfície estàndar
 
 
 ## Driver
-Un driver és un programari que permet al sistema operatiu i les aplicacions comunicar-se directament amb la targeta gràfica. Hi ha moltes targetes gràfiques diferents (NVIDIA, AMD, Intel) i cadascuna té el seu propi driver. Si un motor gràfic haguera de parlar directament amb cada driver, hauria d’implementar codi específic per a cada fabricant i cada model de targeta. Això seria impracticable.Una API gràfica unifica la manera d’accedir al mauinari, fent que el motor gràfic funcione igual en qualsevol targeta
+Un driver és un programari que permet al sistema operatiu i les aplicacions comunicar-se directament amb la targeta gràfica. Hi ha moltes targetes gràfiques diferents (NVIDIA, AMD, Intel) i cadascuna té el seu propi driver. Si un motor gràfic haguera de parlar directament amb cada driver, hauria d’implementar codi específic per a cada fabricant i cada model de targeta. Això seria impracticable. Una API gràfica unifica la manera d’accedir al maquinari, fent que el motor gràfic funcione igual en qualsevol targeta
 
 Els fabricants de targetes gràfiques optimitzen els seus drivers per a una API gràfica (OpenGL, Vulkan o Direct3D) el que permet que el motor gràfic es preocupe només de generar els gràfics, i deixe al driver la feina d’optimitzar-los per la targeta gràfica específica.
 
@@ -141,7 +145,14 @@ screen = pg.display.set_mode((500,400))     # Crea una finestra de 500x400
 screen.fill((255,0,0))                      # Pinta la finestra de color roig
 screen.blit(surface, (0,0))                 # Volquen la surface sobre la pantalla en la posició (0,0)
 pg.display.update()                         # Actualizem la finestra.
-input()
+
+run = True
+while run:
+    for event in pg.event.get():        # Recorrer bucle esdeveniments
+        if event.type == pg.QUIT:       # Verificar tipus esdeveniment
+            run = False
+    pg.display.update()
+
 pg.quit()                                   # Tanca la finestra i pygame
 ```
 

@@ -14,8 +14,10 @@ class Switch(Enum):
     OFF=1
 
 
-def load_image(name:str, scale:float=1) -> pg.Surface:
-    img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),name)
+def load_image(relpath:str, scale:float=1) -> pg.Surface:
+    ruta_nostre_programa_i_el_nom_programa = os.path.abspath(__file__)
+    ruta_nostre_programa = os.path.dirname(ruta_nostre_programa_i_el_nom_programa)
+    img_path = os.path.join(ruta_nostre_programa, relpath)
     image:pg.Surface = pg.image.load(img_path).convert_alpha()
     width, height = image.get_size()
     image = pg.transform.scale(image, (width * scale, height * scale))  
@@ -47,7 +49,7 @@ def main() -> None:
 
     run = True
     while run:
-        # clock.tick(FPS)
+        clock.tick(FPS)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
@@ -59,14 +61,17 @@ def main() -> None:
         pg.display.update()
 
 if __name__ == '__main__':
+    
     pg.init()
 
     screen = pg.display.set_mode((W,H))
+    
     bg = pg.Surface(screen.get_size())
+    
     bg.fill(WHITE)
 
-    image_off = load_image('data/interruptor_off.png')
-    image_on = load_image('data/interruptor_on.png')
+    image_off = load_image(relpath='data/interruptor_off.png', scale=.5)
+    image_on = load_image(relpath='data/interruptor_on.png', scale=0.5)
 
     clock = pg.time.Clock()
 

@@ -8,6 +8,7 @@ W = 800
 H = 450
 
 screen = pygame.display.set_mode((W, H))
+
 pygame.display.set_caption('Drag And Drop')
 
 active_box:int|None = None
@@ -44,6 +45,8 @@ while run:
     elif event.type == pygame.MOUSEMOTION:
       print(event.rel)
       if active_box is not None:
+        
+        
         boxes[active_box].move_ip(event.rel)
 
     elif event.type == pygame.QUIT:
