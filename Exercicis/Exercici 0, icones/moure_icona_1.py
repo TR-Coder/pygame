@@ -31,7 +31,7 @@ icons:list[pg.Surface] = []
 boxes:list[pg.Rect] = []
 
 for i in range(5):
-  img = load_image(relpath=f'assets/img{i}.svg',scale=0.1)
+  img = load_image(relpath=f'assets/img{i}.png',scale=1)
   img_rect = img.get_rect()
   img_rect.x = random.randint(50, 700)
   img_rect.y = random.randint(50, 350)
