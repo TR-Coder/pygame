@@ -3,7 +3,7 @@ import pygame as pg
 pg.init()
 
 clock = pg.time.Clock()
-fps = 1000
+fps = 60
 
 W = 600
 H = 800
@@ -37,7 +37,7 @@ class Explosion(pg.sprite.Sprite):
 		self.counter = 0
 
 	def update(self):
-		explosion_speed = 20
+		explosion_speed = 3
 		self.counter += 1
 		
 		if self.counter >= explosion_speed:
