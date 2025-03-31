@@ -27,9 +27,14 @@ def load_sound(name: str) -> pg.mixer.Sound:
 image_metronome = load_image('metronom.png')
 
 image_bar_first = load_image('barra.png')
+
 bar_rect = image_bar_first.get_rect()
-image_bar = pg.Surface((bar_rect.width, bar_rect.height*2), pg.SRCALPHA).convert_alpha()
-# image_bar.fill((0, 0, 0, 0))  # alternativa a  pg.SRCALPHA
+
+# image_bar = pg.Surface((bar_rect.width, bar_rect.height*2), pg.SRCALPHA).convert_alpha()
+image_bar = pg.Surface((bar_rect.width, bar_rect.height*2)).convert_alpha()
+
+image_bar.fill((255, 0, 0, 255))  # alternativa a  pg.SRCALPHA
+
 image_bar.blit(image_bar_first, (0,0))
 
 
@@ -41,9 +46,9 @@ def draw_metronome(degree:int=0) -> None:
     screen_center = screen.get_rect().center
     center_metronome = image_metronome.get_rect(center=screen_center)
     screen.blit(image_metronome, center_metronome)
-
+        
     rotated_bar = pg.transform.rotate(image_bar, degree)
-    center_bar = rotated_bar.get_rect(center=screen_center)
+    center_bar = rotated_bar.get_rect(center=screen_center)   
     screen.blit(rotated_bar, center_bar.topleft)
 
 
@@ -65,7 +70,7 @@ def angle(ms:int) -> int:
 tick_sound  = load_sound('metronome.mp3')
 
 def main() -> None:
-    ms = 1000
+    ms = 500
     degree = angle(ms)
     run = True
     while run:

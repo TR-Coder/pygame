@@ -90,16 +90,16 @@ def load_image(relative_path_name:str, scale:float=1) -> pg.Surface:
     image = pg.transform.scale(image, (int(image.get_width() * scale), int(image.get_height() * scale)))
     return image
 
-
 def load_images(relative_path_pattern_name:str, scale:float=1) -> list[pg.Surface]:
     surfaces:list[pg.Surface]  = []
     directory = os.path.dirname(os.path.abspath(__file__))
     pattern = os.path.join(directory, relative_path_pattern_name)
     matching_files = glob.glob(pattern)
-    for file in matching_files:
+    for file in sorted(matching_files):
         image:pg.Surface = pg.image.load(file).convert_alpha()
         image = pg.transform.scale(image, (int(image.get_width() * scale), int(image.get_height() * scale)))
         surfaces.append(image)
+        
     return surfaces
 
 # ------------------------------------------------------------------------------------------------------

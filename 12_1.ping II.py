@@ -20,6 +20,7 @@ BG_COLOR = (50, 25, 25)
 FPS = 60
 SPEED = 5
 BALL_RADIUS = 10
+NUMBER_OF_PLAYERS = 2
 
 
 _Group = pg.sprite.Group
@@ -47,31 +48,68 @@ class Paddle(_Sprite):
         self.image = pg.Surface((width, height))
         self.image.fill(color)
         self.initial_coordinates = (x,y)
+        self.width = width
+        self.height = height
+        self.player = player
+        self.y_increment = 5
         self.score = 0
-        self.screen_limits= pg.Rect(0, 0, W, H) 
         self.restart()
+      
+     
+       
+        # mouse_rect.colliderect(obstacle_rect)
 
     def restart(self) -> None:
         self.rect = self.image.get_rect(topleft=self.initial_coordinates)
 
     def update(self) -> None:
-        self.rect.clamp_ip(self.screen_limits)  # Força que es mantinga dins dels límits
+        key = pg.key.get_pressed()
+        key_up_pressed:bool   = key[pg.K_UP]   if NUMBER_OF_PLAYERS == 1 else key[pg.K_w] if self.player == Player.ONE else key[pg.K_UP]
+        key_down_pressed:bool = key[pg.K_DOWN] if NUMBER_OF_PLAYERS == 1 else key[pg.K_s] if self.player == Player.ONE else key[pg.K_DOWN]
 
-
+        if key_up_pressed:
+            self.rect.move_ip(0, -1 * self.y_increment)     # Equival a: self.rect.y = self.rect.y - self.y_increment    
+                  
+        if key_down_pressed:
+            self.rect.move_ip(0, self.y_increment)
+        
+        self.rect.y = max(TOP_MARGIN, min(self.rect.y, H - BOTTOM_MARGIN - self.height))    # No usem clamp_ip ja que és un Rect i no podem posar limits superior i inferior diferents.
+        
 class Ball(_Sprite):
     def __init__(self, radius:int, color:_Color, group: pg.sprite.Group):
         super().__init__(group)
         self.image = pg.Surface((radius*2, radius*2), pg.SRCALPHA)
         pg.draw.circle(self.image, color, (radius, radius), radius)
         self.restart()
+        self.sign = lambda x: 1 if x>=0 else -1
+        self.ball_hits_top_margin    = property(lambda self: self.rect.top < self.TOP_MARGIN)
+        self.ball_hits_bottom_margin = property(lambda self: self.rect.bottom > H - BOTTOM_MARGIN)
     
     def restart(self) -> None:
         self.player = random.choice(list(Player))
         self.y = STATING_Y_BALL
         self.x = STARTING_X_BALL_PLAYER_1 if self.player==Player.ONE else STARTING_X_BALL_PLAYER_2
         self.rect = self.image.get_rect(center=(self.x, self.y))
-
+        
     def update(self) -> None:
+        if self.ball_hits_top_margin or self.ball_hits_bottom_margin:
+            self.y_increment *= -1  
+
+        
+        self.rect.x += round(self.x_increment)
+        self.rect.y += round(self.y_increment)
+        
+        
+        
+
+    
+    
+    def update(self) -> None:
+        # En general:
+        # La pilota es mou sumant la velocitat a ball.x i ball.y.
+        # Si toca les vores esquerra/dreta, s’invertix speed_x.
+        # Si toca les vores superior/inferior, s’invertix speed_y.
+        #
         pass
 
 
