@@ -12,10 +12,14 @@ RED = (255,0,0)
 BLUE = (0,0,255)
 
 pg.init()
+
 font = pg.font.SysFont('Bauhaus 93', 60)
+
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
 bg = pg.Surface(screen.get_size())
 bg.fill(WHITE)
+
 clock = pg.time.Clock()
 
 Coord_ = Tuple[int,int]
@@ -44,7 +48,9 @@ class Button(pg.sprite.Sprite):
         pg.draw.circle(self.image, color, self.rect.center, radius)
 
         self.font = pg.font.SysFont('Calibri',80,bold=True)
+        
         img_txt = self.font.render(symbol, True, WHITE,GREEN)
+        
         rect_txt = img_txt.get_rect(center=self.rect.center)
         self.image.blit(img_txt, rect_txt)
         self.rect.x = x
@@ -61,6 +67,7 @@ class Button(pg.sprite.Sprite):
             self.clicked = False
 
 buttons_group:Group_ = pg.sprite.Group()
+
 button1 = Button(x=100, y=100, radius=55, color=BLACK, symbol='+', group=buttons_group)
 button2 = Button(x=250, y=100, radius=55, color=BLUE, symbol='-', group=buttons_group)
 button2 = Button(x=400, y=100, radius=55, color=RED, symbol='#', group=buttons_group)
