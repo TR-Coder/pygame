@@ -22,9 +22,8 @@ def draw_bg():
 
 #create Explosion class
 class Explosion(pg.sprite.Sprite):
-	def __init__(self, x, y):
-		
-		pg.sprite.Sprite.__init__(self)
+	def __init__(self, x, y, *group):
+		super().__init__(group)
 		self.images = []
 		for num in range(1, 6):
 			img = pg.image.load(f'data/exp{num}.png')
@@ -37,7 +36,7 @@ class Explosion(pg.sprite.Sprite):
 		self.counter = 0
 
 	def update(self):
-		explosion_speed = 3
+		explosion_speed = 5
 		self.counter += 1
 		
 		if self.counter >= explosion_speed:
@@ -60,8 +59,8 @@ while run:
 			run = False
 		if event.type == pg.MOUSEBUTTONDOWN:
 			x,y = pg.mouse.get_pos()
-			explosion = Explosion(x,y)
-			explosion_group.add(explosion)
+			Explosion(x,y,explosion_group)
+
 
 	explosion_group.draw(screen)
 	explosion_group.update()
