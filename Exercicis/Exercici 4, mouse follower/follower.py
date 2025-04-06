@@ -20,6 +20,7 @@ sprite_x, sprite_y = W/2, H/2
 
 class Follower(_Sprite):
         
+        
 
 
 
