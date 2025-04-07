@@ -28,14 +28,12 @@ _Sprite = pg.sprite.Sprite
 _Color = tuple[int,int,int]
 
 # ============================================================================
-# class Score(Enum):          # It is used to know which player has scored.
-#     NONE=0
-#     PLAYER_1=1
-#     PLAYER_2=2
-
 class Player(Enum):         # Reference to a player
-    LEFT=1                   # 1 is right direction
-    RIGHT=-1                  # -1 is left direction
+    LEFT=1                  # 1 is right direction
+    RIGHT=-1                # -1 is left direction
+    
+    def next(self):
+        return Player.LEFT if self == Player.RIGHT else Player.RIGHT
 
 # ============================================================================
 class Paddle(_Sprite):
@@ -58,7 +56,7 @@ class Paddle(_Sprite):
             self.rect.left + margin,
             self.rect.top + margin,
             self.rect.width - 2 * margin,
-            self.rect.height - 2 * margin
+            self.rect.height #- 2 * margin
         )
 
     def collide_with(self, ball:"Ball") -> bool:
@@ -79,12 +77,15 @@ class Paddle(_Sprite):
 
         self.collision_rect.center = self.rect.center
         
+
 class Ball(_Sprite):
     def __init__(self, radius:int, color:_Color, group: pg.sprite.Group):
         super().__init__(group)
         self.image = pg.Surface((radius*2, radius*2), pg.SRCALPHA)
         pg.draw.circle(self.image, color, (radius, radius), radius)
         self.sign = lambda x: 1 if x>=0 else -1
+        self.level = 0
+        self.number_of_bounces = 0
         self.restart(random.choice(list(Player)))
 
     def ball_hits_the_top_or_bottom_edge(self) -> bool:
@@ -97,13 +98,19 @@ class Ball(_Sprite):
                 return paddle
         return None
 
-
-    def check_if_any_player_has_scored_a_goal(self) -> Player|None:
+    def any_player_has_scored_a_goal(self) -> Paddle|None:
         if (self.rect.left < 0):
-            return Player.LEFT
+            return paddle_Right
         if (self.rect.right > W):
-            return Player.RIGHT
+            return paddle_Left
         return None
+    
+    def next_level(self):
+        self.number_of_bounces += 1
+        if self.number_of_bounces == 2:
+            number_of_bounces = 0
+            self.x_increment = self.sign(self.x_increment) * (abs(self.x_increment) + 0.25)
+            level += 1       
     
     def restart(self, player: Player) -> None:
         self.y = STARTING_Y_BALL
@@ -123,6 +130,7 @@ class Ball(_Sprite):
                  
             self.x_increment *= -1
             self.y_increment = self.sign(self.y_increment) * random.uniform(1.5, 2.5)   # Change the bounce angle a little randomly
+            number_of_bounces += 1
 
             # prevent the ball from bouncing inside the paddle
             if paddle.player == Player.LEFT:
@@ -135,13 +143,10 @@ class Ball(_Sprite):
 
         self.collision_rect.center = self.rect.center
 
-
-
 # ===========================================================================================
 def draw_text(text:str, x:int, y:int):
     img = font.render(text, True, WHITE)
     screen.blit(img, (x,y))
-
 
 def draw_score():
     draw_text(f'Player 1: {paddle_Left.score}', 40, 10)
@@ -159,38 +164,44 @@ def start_new_game(player: Player) -> None:
     '''Quan s'inicia un nova partida hem d'indicar el jugador que la inicia'''
     paddle_Left.restart()
     paddle_Right.restart()
-    # ball.restart()
+    ball.restart(player)
 
-
+# ============================================================================
 def main():
+    number_of_players = 2
+    number_of_bounces = 0
+    playing = False
     clock = pg.time.Clock()
 
     run = True
     while run:
         clock.tick(FPS)
         draw_background()
-        draw_score()
-
-        paddle_group.update()
-        ball_group.update()
-
-        player = ball.check_if_any_player_has_scored_a_goal()
-        if player:
-            run = False
+        
+        if not playing:
+            draw_text('press any key', HALF_BOARD_X-100, HALF_BOARD_Y)
+        elif goal_player := ball.any_player_has_scored_a_goal():
+            goal_player.score += 1
+            start_new_game(goal_player.player.next())
+            playing = False
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
-        
-        paddle_group.draw(screen)
-        ball_group.draw(screen)
+            if event.type == pg.KEYDOWN and not playing:
+                playing = True
+           
+        draw_score()
+        if playing:
+            paddle_group.update()
+            ball_group.update()
+            paddle_group.draw(screen)
+            ball_group.draw(screen)
 
-        # pl = paddle_group.sprites()[0].collision_rect
-        # pr = paddle_group.sprites()[1].collision_rect
-        # b =  ball_group.sprites()[0].collision_rect
-        # pg.draw.rect(screen, (255, 0, 0), pl, 1)
-        # pg.draw.rect(screen, (255, 0, 0), pr, 1)
-        # pg.draw.rect(screen, (255, 0, 0), b, 2) 
+        # DEPURACIÓ: Mostrar rectangles de col·lisió
+        # pg.draw.rect(screen, (255, 0, 0), paddle_Left.collision_rect, 1)
+        # pg.draw.rect(screen, (255, 0, 0), paddle_Right.collision_rect, 1)
+        # pg.draw.rect(screen, (255, 0, 0), ball.collision_rect, 2) 
 
         pg.display.update()
 
@@ -208,6 +219,7 @@ if __name__ == '__main__':
     paddle_Right = Paddle(x=W-40, y=HALF_BOARD_Y, player=Player.RIGHT, color=WHITE, group=paddle_group)
     ball = Ball(radius=BALL_RADIUS, color=WHITE, group=ball_group)
     level = 0
+    HALF_BOARD_X = screen.get_rect().centerx
 
     main()
 

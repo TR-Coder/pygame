@@ -28,7 +28,7 @@ def load_image(relpath:str, scale:float=1) -> pg.Surface:
     image = pg.transform.scale(image, (width * scale, height * scale))
     return image
   
-image_texts:list[str] = ['ma','monstre','botella','campana','sol'] 
+texts:list[str] = ['ma','monstre','botella','campana','sol'] 
 font:pg.font.Font = pg.font.SysFont('Calibri',40)
   
 # # ramdom
@@ -69,14 +69,14 @@ IMAGES_AMOUNT = 5
 def create_sprites() -> tuple[int,int]:
   images_width = 0
   for i in range(IMAGES_AMOUNT):
-    sprite = Icon(0, 50, f'assets/img{i}.png', image_texts[i], icons_group)
+    sprite = Icon(0, 50, f'assets/img{i}.png', texts[i], icons_group)
     images_width += sprite.rect.width
 
-  texts = random.sample(image_texts, len(image_texts))
+  texts_random = random.sample(texts, len(texts))
   
   texts_width = 0
   for i in range(IMAGES_AMOUNT):
-    sprite = Icon(0, 350, None, texts[i], texts_group)
+    sprite = Icon(0, 350, None, texts_random[i], texts_group)
     texts_width += sprite.rect.width
   
   return (images_width, texts_width)
@@ -98,39 +98,36 @@ images_width, texts_width = create_sprites()
 distributes_distances_in_x(texts_group, texts_width)
 distributes_distances_in_x(icons_group, images_width)
 
-points = IMAGES_AMOUNT
+score = IMAGES_AMOUNT
 run = True
 while run:
   clock.tick(FPS)
   screen.blit(bg, (0, 0))
     
   for event in pg.event.get():
-    if event.type == pg.MOUSEBUTTONDOWN:
-      if event.button == 1:
-        for num, sprite in enumerate(icons_group):
-          if sprite.collides_with_point(event.pos):
-            active_box = num
-            break 
-
-    elif event.type == pg.MOUSEBUTTONUP:
-      if event.button == 1:          
-        if active_box is not None:
-          icon:Icon = icons_group.sprites()[active_box]
-          for num, sprite in enumerate(texts_group):
-            if sprite.rect.colliderect(icon.rect) and (icon.text == sprite.text):
-              icons_group.remove(icon)
-              texts_group.remove(sprite)
-              points -= 1
-              if points == 0:
-                run = False
-              break
-          else:
-            icon.rect.x = icon.initial_x
-            icon.rect.y = 50
-        active_box = None
-
-    elif event.type == pg.MOUSEMOTION:
+    if event.type == pg.MOUSEBUTTONDOWN and  event.button == 1:
+      for num, sprite in enumerate(icons_group):
+        if sprite.collides_with_point(event.pos):
+          active_box = num
+          break 
+                    
+    elif event.type == pg.MOUSEBUTTONUP and event.button == 1:          
       if active_box is not None:
+        icon:Icon = icons_group.sprites()[active_box]
+        for sprite in texts_group:
+          if sprite.rect.colliderect(icon.rect) and (icon.text == sprite.text):
+            icons_group.remove(icon)
+            texts_group.remove(sprite)
+            score -= 1
+            if score == 0:
+              run = False
+            break
+        else:
+          icon.rect.x = icon.initial_x
+          icon.rect.y = 50
+      active_box = None
+
+    elif event.type == pg.MOUSEMOTION and active_box is not None:
         icon2:Icon = icons_group.sprites()[active_box]
         icon2.rect.move_ip(event.rel)
         icon2.rect.clamp_ip(screen.get_rect())      # Limitar la posició de les icones dins de la pantalla.

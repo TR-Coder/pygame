@@ -47,6 +47,7 @@ class Button(pg.sprite.Sprite):
             self.clicked = False
 
 # ------------------------------------------------------------------------------------------------------
+# Nota: get_ticks() retorna el nombre de mil·lisegons que han passat des que es va iniciar el programa.
 class Timer():
     def __init__(self, ms: int, first_time_over:bool=False):
         self.ms = ms
