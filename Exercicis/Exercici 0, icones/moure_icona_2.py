@@ -131,16 +131,12 @@ while run:
         icon2:Icon = icons_group.sprites()[active_box]
         icon2.rect.move_ip(event.rel)
         icon2.rect.clamp_ip(screen.get_rect())      # Limitar la posició de les icones dins de la pantalla.
-        
 
     elif event.type == pg.QUIT:
       run = False
 
-  for sprite in icons_group:
-    screen.blit(sprite.image, sprite.rect)
-
-  for sprite in texts_group:
-    screen.blit(sprite.image, sprite.rect)
+  icons_group.draw(screen)
+  texts_group.draw(screen)
 
   pg.display.update()
 

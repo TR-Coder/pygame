@@ -64,12 +64,12 @@ class MetronomeBar(pg.sprite.Sprite):
 
     def update(self) -> None:
         if self.position == MetronomeBar.Position.LEFT:
-            self.image = self.img_left
-            self.rect = self.rect_left
-            self.position = MetronomeBar.Position.RIGHT
-        else:
             self.image = self.img_right
             self.rect = self.rect_right
+            self.position = MetronomeBar.Position.RIGHT
+        else:
+            self.image = self.img_left
+            self.rect = self.rect_left
             self.position = MetronomeBar.Position.LEFT
             
     def new(self, speed:int) -> MetronomeBar:
