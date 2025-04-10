@@ -14,9 +14,13 @@ BLUE = (0,0,255)
 MAX_SPEED = 500
 MIN_SPEED = 1500
 
+_Group = pg.sprite.Group
+_Surface = pg.Surface
+_Rect = pg.Rect
+
 # ------------------------------------------------------------------------------------------------------
 class Metronome(pg.sprite.Sprite):
-    def __init__(self, group: pg.sprite.Group):
+    def __init__(self, group: _Group):
         super().__init__(group)
         self.image = components.load_image(r'assets/metronom.png')
         self.rect = self.image.get_rect(center=screen_center)       # En el centre de la pantalla.
@@ -28,21 +32,21 @@ class Bar(pg.sprite.Sprite):
         LEFT=0
         RIGHT=1
  
-    def __init__(self, ms:int, group: pg.sprite.Group):
+    def __init__(self, ms:int, group: _Group):
         super().__init__(group)
 
         self.ms = ms
         self.timer = components.Timer(ms, first_time_over=True)
         
-        self.img_bar = self.load_image()
+        self.image_bar = self.load_image()
         self.calculate_angle_and_image(ms)
 
-        self.image = self.img_right
-        self.rect = self.rect_right
+        self.image = self.image_R
+        self.rect = self.rect_R
         self.position = Bar.Position.LEFT
 
     
-    def load_image(self) -> pg.Surface:
+    def load_image(self) -> _Surface:
         img_first = components.load_image(r'assets/barra.png')
         rect = img_first.get_rect()
         img = pg.Surface((rect.width, rect.height*2), pg.SRCALPHA)
@@ -51,21 +55,20 @@ class Bar(pg.sprite.Sprite):
 
     def calculate_angle_and_image(self, ms:int) -> None:  
         self.degree:int = 45 if (ms>=800) else 10 if (ms<=400) else int(10 + (ms - 400) * (35/400))
-        self.img_left:pg.Surface  = pg.transform.rotate(self.img_bar, self.degree)
-        self.img_right:pg.Surface = pg.transform.rotate(self.img_bar, -self.degree)
-        self.rect_left:pg.Rect    = self.img_left.get_rect(center=screen_center)
-        self.rect_right:pg.Rect   = self.img_right.get_rect(center=screen_center)
-
+        self.image_L:_Surface  = pg.transform.rotate(self.image_bar, self.degree)
+        self.image_R:_Surface  = pg.transform.rotate(self.image_bar, -self.degree)
+        self.rect_L:_Rect      = self.image_L.get_rect(center=screen_center)
+        self.rect_R:_Rect      = self.image_R.get_rect(center=screen_center)
 
     def update(self) -> None:
         if self.position == Bar.Position.LEFT:
-            self.image = self.img_right
-            self.rect = self.rect_right
             self.position = Bar.Position.RIGHT
+            self.image = self.image_R
+            self.rect = self.rect_R
         else:
-            self.image = self.img_left
-            self.rect = self.rect_left
             self.position = Bar.Position.LEFT
+            self.image = self.image_L
+            self.rect = self.rect_L
             
     def increment_speed(self, ms:int) -> None:
         self.ms += ms
@@ -92,25 +95,20 @@ def draw_speed(ms:int) -> None:
 # ------------------------------------------------------------------------------------------------------
 def main() -> None: 
     miliseconds = 1000
-     
-    buttons_group:pg.sprite.Group = pg.sprite.Group()
-    metronome_group:pg.sprite.Group = pg.sprite.Group()
-
-    button_plus = components.Button(x=30, y=300, radius=55, bg_color=BLACK, symbol='+', group=buttons_group)
-    button_minus =components.Button(x=30, y=450, radius=55, bg_color=BLUE, symbol='-', group=buttons_group)
+    buttons_group:_Group   = pg.sprite.Group()
+    metronome_group:_Group = pg.sprite.Group()
+    button_plus  = components.Button(x=30, y=300, radius=55, bg_color=BLACK, symbol='+', group=buttons_group)
+    button_minus = components.Button(x=30, y=450, radius=55, bg_color=BLUE,  symbol='-', group=buttons_group)
+    tick_sound   = components.load_sound(r'assets/metronome.mp3')
 
     Metronome(group=metronome_group)
     bar = Bar(miliseconds, metronome_group)
-
-    tick_sound  = components.load_sound(r'assets/metronome.mp3')
-    
-    
-    # --------------------- bucle principal ---------------------
     main_loop = True
     
+    # --------------------- bucle principal ---------------------
+
     while main_loop:
-        clear_screen()
-        
+        clear_screen()        
         mouse_click = components.MouseClick.NOT_PRESSED
 
         for event in pg.event.get():
@@ -129,13 +127,13 @@ def main() -> None:
             buttons_group.update(mouse_click)
             if button_plus.clicked:
                 bar.increment_speed(-100)
-            if button_minus.clicked:
+            elif button_minus.clicked:
                 bar.increment_speed(100)                 
 
         metronome_group.draw(screen)
         buttons_group.draw(screen)
         draw_speed(bar.ms)
-        
+
         pg.display.update()
         
 
@@ -146,7 +144,7 @@ if __name__ == '__main__':
     screen_center = screen.get_rect().center
     pg.display.set_caption('Metronome')
     bg = pg.Surface(screen.get_size())
-    bg.fill(WHITE)
     font = pg.font.Font(None, 36)
+    bg.fill(WHITE)
     main()
     pg.quit()
